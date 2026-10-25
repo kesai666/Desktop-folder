@@ -1,11 +1,20 @@
 > Windows 桌面小工具：**外观是 iPhone 主屏文件夹，内里是真实目录**。
-> 一个进程里可以同时摆多个小组件，每个指向不同文件夹；拖文件进去真的移入，双击用默认程序打开，删除进回收站。
+> 一个进程里可以同时摆多个小组件，每个指向不同文件夹；拖文件进去真的移入，双击用默认程序打开，删除进应用回收站，Ctrl+Z 可撤销。
 
 ![收起态](shots/13-compact-final.png)
 ![展开态](shots/15-expanded-noring.png)
 ![排列模式](shots/18-arrange.png)
 ![磁吸高亮](shots/20-magnet.png)
 ![进子文件夹](shots/10-subfolder.png)
+
+## 下载
+
+[![build](https://github.com/kesai666/Desktop-folder/actions/workflows/build.yml/badge.svg)](https://github.com/kesai666/Desktop-folder/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/kesai666/Desktop-folder)](https://github.com/kesai666/Desktop-folder/releases)
+
+- [下载最新版](https://github.com/kesai666/Desktop-folder/releases/latest)
+- 安装版：`iOS.Folder.Widget.Setup.<版本>.exe`
+- 便携版：`iOS.Folder.Widget.<版本>.exe`（双击即用，不写注册表）
 
 ## 它是什么
 
