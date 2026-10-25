@@ -1,13 +1,88 @@
 'use strict';
 
 const $ = (id) => document.getElementById(id);
-let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover' };
+let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center' };
+let currentId = null;
 let saveTimer = 0;
 
 function setStatus(text) {
   $('status').textContent = text;
   clearTimeout(setStatus.timer);
   setStatus.timer = setTimeout(() => { $('status').textContent = ''; }, 1800);
+}
+
+function renderWidgets(data) {
+  currentId = data.currentId;
+  const root = $('widgetList');
+  if (!root) return;
+  root.replaceChildren();
+  for (const widget of data.widgets || []) {
+    const row = document.createElement('div');
+    row.className = 'widget-item';
+    const meta = document.createElement('div');
+    meta.className = 'widget-meta';
+    meta.textContent = widget.name;
+    meta.title = widget.folder;
+    if (widget.id === currentId) {
+      const em = document.createElement('em');
+      em.textContent = '当前';
+      meta.appendChild(em);
+    }
+    const button = document.createElement('button');
+    button.textContent = '移除';
+    button.addEventListener('click', async () => {
+      const res = await window.settings.removeWidget(widget.id);
+      if (res && res.ok) {
+        if (widget.id === currentId) window.settings.close();
+        else {
+          const next = await window.settings.get();
+          renderWidgets(next);
+          setStatus('已移除小组件');
+        }
+      } else if (res && !res.canceled) {
+        setStatus(res.error || '移除失败');
+      }
+    });
+    row.append(meta, button);
+    root.appendChild(row);
+  }
+}
+
+async function renderTrash() {
+  const root = $('trashList');
+  if (!root) return;
+  const list = await window.settings.listTrash();
+  root.replaceChildren();
+  if (!list.length) {
+    const empty = document.createElement('div');
+    empty.className = 'trash-empty';
+    empty.textContent = '回收站是空的';
+    root.appendChild(empty);
+    return;
+  }
+  for (const batch of list) {
+    const row = document.createElement('div');
+    row.className = 'trash-item';
+    const meta = document.createElement('div');
+    meta.className = 'trash-meta';
+    const when = new Date(batch.deletedAt || Date.now()).toLocaleString('zh-CN', { hour12: false });
+    const names = (batch.names || []).join('、');
+    meta.textContent = `${when} · ${batch.count} 项${names ? ` · ${names}` : ''}`;
+    meta.title = meta.textContent;
+    const button = document.createElement('button');
+    button.textContent = '恢复';
+    button.addEventListener('click', async () => {
+      const res = await window.settings.restoreTrash(batch.batchId);
+      if (res && res.ok) {
+        setStatus(`已恢复 ${res.restored} 项`);
+        await renderTrash();
+      } else {
+        setStatus((res && res.error) || '恢复失败');
+      }
+    });
+    row.append(meta, button);
+    root.appendChild(row);
+  }
 }
 
 function render(data) {
@@ -18,6 +93,7 @@ function render(data) {
   $('customBlur').value = appearance.customBlur;
   $('iconSize').value = appearance.iconSize;
   $('wallpaperFit').value = appearance.wallpaperFit;
+  $('wallpaperPosition').value = appearance.wallpaperPosition;
   $('blurValue').textContent = `${appearance.blur}px`;
   $('frostValue').textContent = `${appearance.frost}%`;
   $('customBlurValue').textContent = `${appearance.customBlur}px`;
@@ -40,6 +116,7 @@ function scheduleSave() {
     customBlur: Number($('customBlur').value),
     iconSize: Number($('iconSize').value),
     wallpaperFit: $('wallpaperFit').value,
+    wallpaperPosition: $('wallpaperPosition').value,
   };
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
@@ -52,16 +129,33 @@ for (const id of ['blur', 'frost', 'customBlur', 'iconSize']) {
   $(id).addEventListener('input', scheduleSave);
 }
 $('wallpaperFit').addEventListener('change', scheduleSave);
+$('wallpaperPosition').addEventListener('change', scheduleSave);
 
 $('autoStart').addEventListener('change', async () => {
   const res = await window.settings.setAutoStart($('autoStart').checked);
   if (res && res.ok) setStatus($('autoStart').checked ? '已开启开机启动' : '已关闭开机启动');
 });
 
+$('resetAppearance').addEventListener('click', async () => {
+  appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center' };
+  $('blur').value = appearance.blur;
+  $('frost').value = appearance.frost;
+  $('customBlur').value = appearance.customBlur;
+  $('iconSize').value = appearance.iconSize;
+  $('wallpaperFit').value = appearance.wallpaperFit;
+  $('wallpaperPosition').value = appearance.wallpaperPosition;
+  syncLabels();
+  const res = await window.settings.setAppearance(appearance);
+  if (res && res.ok) setStatus('已恢复默认外观');
+});
+
 $('addWidget').addEventListener('click', async () => {
   const res = await window.settings.addWidget();
-  if (res && res.ok) setStatus(`已新建「${res.name}」`);
-  else setStatus((res && res.error) || '新建小组件失败');
+  if (res && res.ok) {
+    setStatus(`已新建「${res.name}」`);
+    const data = await window.settings.get();
+    renderWidgets(data);
+  } else setStatus((res && res.error) || '新建小组件失败');
 });
 
 $('openLogs').addEventListener('click', async () => {
@@ -76,7 +170,10 @@ $('openTrash').addEventListener('click', async () => {
 
 $('emptyTrash').addEventListener('click', async () => {
   const res = await window.settings.emptyTrash();
-  if (res && res.ok) setStatus('应用回收站已清空');
+  if (res && res.ok) {
+    setStatus('应用回收站已清空');
+    renderTrash().catch(() => {});
+  }
 });
 
 $('checkUpdate').addEventListener('click', async () => {
@@ -96,4 +193,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') window.settings.close();
 });
 
-window.settings.get().then(render).catch(() => setStatus('读取设置失败'));
+window.settings.get().then((data) => {
+  render(data);
+  renderWidgets(data);
+  renderTrash().catch(() => {});
+}).catch(() => setStatus('读取设置失败'));

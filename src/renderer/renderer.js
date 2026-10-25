@@ -27,6 +27,7 @@ const el = {
   empty: document.getElementById('emptyState'),
   footCount: document.getElementById('footCount'),
   toast: document.getElementById('toast'),
+  marquee: document.getElementById('marquee'),
 };
 
 const state = {
@@ -46,12 +47,13 @@ const state = {
   display: null,
   wallpaper: null,
   customWallpaper: null,
-  appearance: { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover' },
+  appearance: { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center' },
   pad: MINI_PAD,
   selection: -1,
   anchor: -1,
   multi: new Set(),
   clipboard: null,
+  marqueeJustEnded: false,
   renaming: null,
   toastTimer: 0,
   iconRun: 0,
@@ -123,6 +125,10 @@ async function init() {
   state.allEntries = info.entries || [];
   state.entries = state.allEntries.slice();
   state.query = '';
+  state.sortMode = info.sortMode || 'name';
+  if (state.sortMode !== 'custom') {
+    state.entries = sortEntriesForView(state.entries, state.sortMode);
+  }
   state.windowPos = info.windowPos;
   state.display = info.display;
   state.wallpaper = info.wallpaper;
@@ -210,11 +216,15 @@ function applyAppearance(info) {
   const customBlur = Math.min(30, Math.max(0, Number(state.appearance.customBlur) || 0));
   const iconSize = Math.min(76, Math.max(52, Number(state.appearance.iconSize) || 64));
   const fit = state.appearance.wallpaperFit === 'contain' ? 'contain' : 'cover';
+  const position = ['center', 'top', 'bottom', 'left', 'right'].includes(state.appearance.wallpaperPosition)
+    ? state.appearance.wallpaperPosition
+    : 'center';
   el.root.style.setProperty('--wp-blur', `${blur}px`);
   el.root.style.setProperty('--custom-blur', `${customBlur}px`);
   el.root.style.setProperty('--frost-alpha', String(frost / 100));
   el.root.style.setProperty('--tile-icon', `${iconSize}px`);
   el.root.style.setProperty('--wp-fit', fit);
+  el.root.style.setProperty('--wp-pos', position);
 }
 
 function applyLayout() {
@@ -613,6 +623,7 @@ async function rootMenu() {
   else if (action === 'choose') await chooseFolder();
   else if (action.startsWith('sort-')) {
     state.sortMode = action.slice(5);
+    api.setSort(state.sortMode);
     applyFilter();
     toast('已切换排序方式');
   } else if (action === 'paste') await pasteClipboard();
@@ -781,6 +792,7 @@ async function commitOrder() {
   }
   state.entries = entries;
   state.sortMode = 'custom';
+  api.setSort('custom');
   if (!state.query) state.allEntries = entries.slice();
   render();
   const res = await api.setOrder(state.dir, entries.map((entry) => entry.name));
@@ -791,6 +803,7 @@ async function sortByName() {
   const res = await api.clearOrder(state.dir);
   if (res && res.ok) {
     state.sortMode = 'name';
+    api.setSort('name');
     toast('已按名称排序');
     await refresh();
   }
@@ -817,6 +830,10 @@ async function createFolder() {
 // ------------------------------------------------------------------ 展开态交互
 
 el.grid.addEventListener('click', (e) => {
+  if (state.marqueeJustEnded) {
+    state.marqueeJustEnded = false;
+    return;
+  }
   const tile = e.target.closest('.tile');
   if (!tile) {
     clearSelection();
@@ -844,6 +861,60 @@ el.grid.addEventListener('click', (e) => {
     state.anchor = idx;
   }
   paintSelection();
+});
+
+// 框选：在网格空白处拖出选框，选中与选框相交的图标
+el.grid.addEventListener('mousedown', (e) => {
+  if (e.button !== 0 || state.editMode || state.renaming || !state.open) return;
+  if (e.target.closest('.tile')) return;
+  const startX = e.clientX;
+  const startY = e.clientY;
+  let moved = false;
+  el.marquee.hidden = false;
+
+  const paint = (x, y) => {
+    const left = Math.min(startX, x);
+    const top = Math.min(startY, y);
+    const width = Math.abs(x - startX);
+    const height = Math.abs(y - startY);
+    Object.assign(el.marquee.style, {
+      left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px`,
+    });
+    el.marquee.hidden = width < 3 && height < 3;
+  };
+
+  const onMove = (ev) => {
+    if (Math.abs(ev.clientX - startX) > 3 || Math.abs(ev.clientY - startY) > 3) moved = true;
+    paint(ev.clientX, ev.clientY);
+  };
+
+  const onUp = (ev) => {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    el.marquee.hidden = true;
+    if (!moved) return;
+    const left = Math.min(startX, ev.clientX);
+    const top = Math.min(startY, ev.clientY);
+    const right = Math.max(startX, ev.clientX);
+    const bottom = Math.max(startY, ev.clientY);
+    const selected = new Set();
+    for (const tile of el.grid.querySelectorAll('.tile')) {
+      const rect = tile.getBoundingClientRect();
+      if (rect.left < right && rect.right > left && rect.top < bottom && rect.bottom > top) {
+        selected.add(Number(tile.dataset.idx));
+      }
+    }
+    state.multi = selected;
+    state.selection = selected.size ? [...selected].pop() : -1;
+    state.anchor = selected.size ? [...selected][0] : -1;
+    state.marqueeJustEnded = true;
+    setTimeout(() => { state.marqueeJustEnded = false; }, 0);
+    paintSelection();
+  };
+
+  paint(startX, startY);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
 });
 
 el.grid.addEventListener('dblclick', (e) => {

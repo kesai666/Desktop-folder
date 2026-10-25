@@ -63,6 +63,7 @@ body {
 /* 自定义壁纸：不采样桌面，直接铺满当前组件，模糊轻一点 */
 .wp.custom {
   background-size: var(--wp-fit, cover);
+  background-position: var(--wp-pos, center);
   filter: blur(var(--custom-blur, 10px)) saturate(1.18) brightness(0.98);
 }
 
@@ -619,6 +620,15 @@ body.dark .search {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.marquee {
+  position: fixed;
+  z-index: 60;
+  border: 1px solid rgba(130, 180, 255, 0.95);
+  background: rgba(95, 155, 255, 0.18);
+  border-radius: 4px;
+  pointer-events: none;
 }
 
 /* 骨架屏：图标还没取到时 */

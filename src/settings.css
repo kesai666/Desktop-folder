@@ -98,6 +98,80 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .check input { width: 16px; height: 16px; accent-color: var(--accent); }
 
 .buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.trash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.widget-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+  font-size: 12px;
+}
+
+.widget-item .widget-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-item .widget-meta em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.widget-item button {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.trash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.trash-item .trash-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trash-item button {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.trash-empty {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
 button {
   border: 1px solid var(--line);
   background: var(--card);

@@ -176,6 +176,8 @@ function saveWidgetConfig(w) {
     item.customBlur = w.customBlur;
     item.iconSize = w.iconSize;
     item.wallpaperFit = w.wallpaperFit;
+    item.wallpaperPosition = w.wallpaperPosition;
+    item.sortMode = w.sortMode;
   } else {
     config.widgets.push({
       id: w.id,
@@ -189,6 +191,8 @@ function saveWidgetConfig(w) {
       customBlur: w.customBlur,
       iconSize: w.iconSize,
       wallpaperFit: w.wallpaperFit,
+      wallpaperPosition: w.wallpaperPosition,
+      sortMode: w.sortMode,
     });
   }
   saveConfig();
@@ -254,6 +258,50 @@ async function moveToTrash(file, batchId, index) {
     name: path.basename(file),
     deletedAt: Date.now(),
   };
+}
+
+function trashBatches() {
+  const groups = new Map();
+  for (const record of trashRecords) {
+    const key = record.batchId || 'unknown';
+    if (!groups.has(key)) {
+      groups.set(key, { batchId: key, deletedAt: record.deletedAt || 0, count: 0, names: [] });
+    }
+    const group = groups.get(key);
+    group.count += 1;
+    group.deletedAt = Math.max(group.deletedAt, record.deletedAt || 0);
+    if (group.names.length < 4) group.names.push(record.name || path.basename(record.originalPath || ''));
+  }
+  return [...groups.values()].sort((a, b) => b.deletedAt - a.deletedAt);
+}
+
+async function restoreTrashBatch(batch) {
+  const records = trashRecords.filter((item) => item.batchId === batch);
+  if (!records.length) return { ok: false, error: '没有可恢复的删除' };
+  let restored = 0;
+  const errors = [];
+  for (const record of records) {
+    try {
+      if (!fs.existsSync(record.trashPath)) continue;
+      const parent = path.dirname(record.originalPath);
+      await fsp.mkdir(parent, { recursive: true });
+      let target = record.originalPath;
+      if (fs.existsSync(target)) {
+        target = await fsutil.uniquePath(parent, path.basename(target));
+      }
+      await fsp.rename(record.trashPath, target);
+      restored += 1;
+    } catch (err) {
+      errors.push({ path: record.originalPath, error: err.message });
+    }
+  }
+  const done = new Set(
+    records.filter((record) => !fs.existsSync(record.trashPath)).map((record) => record.trashPath),
+  );
+  trashRecords = trashRecords.filter((record) => !done.has(record.trashPath));
+  if (lastTrashBatch === batch) lastTrashBatch = null;
+  saveTrash();
+  return { ok: restored > 0, restored, errors };
 }
 
 // ---------------------------------------------------------------- 开机自启动
@@ -795,6 +843,7 @@ function widgetFrom(event) {
 function createWidget({
   folder, x, y, id, autoOpen = false, wallpaper = null, autoFolder = false,
   blur = 26, frost = 100, customBlur = 10, iconSize = 64, wallpaperFit = 'cover',
+  wallpaperPosition = 'center', sortMode = 'name',
 }) {
   const wid = Number.isFinite(id) ? id : nextWidgetId++;
   if (wid >= nextWidgetId) nextWidgetId = wid + 1;
@@ -858,6 +907,8 @@ function createWidget({
     customBlur: Number.isFinite(customBlur) ? Math.min(30, Math.max(0, Math.round(customBlur))) : 10,
     iconSize: Number.isFinite(iconSize) ? Math.min(76, Math.max(52, Math.round(iconSize))) : 64,
     wallpaperFit: wallpaperFit === 'contain' ? 'contain' : 'cover',
+    wallpaperPosition: ['center', 'top', 'bottom', 'left', 'right'].includes(wallpaperPosition) ? wallpaperPosition : 'center',
+    sortMode: ['name', 'time', 'size', 'type', 'custom'].includes(sortMode) ? sortMode : 'name',
   };
   widgets.set(wid, w);
 
@@ -1350,7 +1401,9 @@ function registerIpc() {
         customBlur: w.customBlur,
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
+        wallpaperPosition: w.wallpaperPosition,
       },
+      sortMode: w.sortMode,
       dark: nativeTheme.shouldUseDarkColors,
       sizes: {
         panel: PANEL_WIN,
@@ -1453,36 +1506,20 @@ function registerIpc() {
     return { ok: trashed > 0, trashed, batchId: trashed ? batchId : null, errors };
   });
 
-  ipcMain.handle('trash:undo', async (event) => {
+  ipcMain.handle('trash:undo', async () => {
     const batch = lastTrashBatch
       || (trashRecords.length
         ? trashRecords.reduce((a, b) => (a.deletedAt > b.deletedAt ? a : b)).batchId
         : null);
     if (!batch) return { ok: false, error: '没有可撤销的删除' };
-    const records = trashRecords.filter((item) => item.batchId === batch);
-    if (!records.length) return { ok: false, error: '没有可撤销的删除' };
-    let restored = 0;
-    const errors = [];
-    for (const record of records) {
-      try {
-        if (!fs.existsSync(record.trashPath)) continue;
-        const parent = path.dirname(record.originalPath);
-        await fsp.mkdir(parent, { recursive: true });
-        let target = record.originalPath;
-        if (fs.existsSync(target)) {
-          target = await fsutil.uniquePath(parent, path.basename(target));
-        }
-        await fsp.rename(record.trashPath, target);
-        restored += 1;
-      } catch (err) {
-        errors.push({ path: record.originalPath, error: err.message });
-      }
-    }
-    const done = new Set(records.filter((record) => !fs.existsSync(record.trashPath)).map((record) => record.trashPath));
-    trashRecords = trashRecords.filter((record) => !done.has(record.trashPath));
-    lastTrashBatch = null;
-    saveTrash();
-    return { ok: restored > 0, restored, errors };
+    return restoreTrashBatch(batch);
+  });
+
+  ipcMain.handle('trash:list', async () => trashBatches());
+
+  ipcMain.handle('trash:restore', async (event, batchId) => {
+    if (!batchId) return { ok: false, error: '没有指定要恢复的删除' };
+    return restoreTrashBatch(batchId);
   });
 
   ipcMain.handle('trash:empty', async (event) => {
@@ -1582,6 +1619,16 @@ function registerIpc() {
     delete dirOrders[orderKey(dir)];
     saveOrders();
     return { ok: true };
+  });
+
+  ipcMain.handle('view:sort', async (event, mode) => {
+    const w = widgetFrom(event);
+    if (!w) return { ok: false };
+    const allowed = ['name', 'time', 'size', 'type', 'custom'];
+    if (!allowed.includes(mode)) return { ok: false };
+    w.sortMode = mode;
+    saveWidgetConfig(w);
+    return { ok: true, sortMode: w.sortMode };
   });
 
   ipcMain.on('drag:out', (event, paths, iconData) => {
@@ -1957,12 +2004,19 @@ function registerIpc() {
     return {
       folder: w.rootDir,
       autoStart: config.autoStart !== false,
+      currentId: w.id,
+      widgets: [...widgets.values()].map((item) => ({
+        id: item.id,
+        name: path.basename(item.rootDir) || item.rootDir,
+        folder: item.rootDir,
+      })),
       appearance: {
         blur: w.blur,
         frost: w.frost,
         customBlur: w.customBlur,
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
+        wallpaperPosition: w.wallpaperPosition,
       },
     };
   });
@@ -1975,11 +2029,15 @@ function registerIpc() {
     const customBlur = Math.min(30, Math.max(0, Math.round(Number(appearance && appearance.customBlur))));
     const iconSize = Math.min(76, Math.max(52, Math.round(Number(appearance && appearance.iconSize))));
     const wallpaperFit = appearance && appearance.wallpaperFit === 'contain' ? 'contain' : 'cover';
+    const wallpaperPosition = appearance && ['center', 'top', 'bottom', 'left', 'right'].includes(appearance.wallpaperPosition)
+      ? appearance.wallpaperPosition
+      : 'center';
     w.blur = Number.isFinite(blur) ? blur : w.blur;
     w.frost = Number.isFinite(frost) ? frost : w.frost;
     w.customBlur = Number.isFinite(customBlur) ? customBlur : w.customBlur;
     w.iconSize = Number.isFinite(iconSize) ? iconSize : w.iconSize;
     w.wallpaperFit = wallpaperFit;
+    w.wallpaperPosition = wallpaperPosition;
     saveWidgetConfig(w);
     if (w.win && !w.win.isDestroyed()) {
       w.win.webContents.send('ui:appearance', {
@@ -1988,6 +2046,7 @@ function registerIpc() {
         customBlur: w.customBlur,
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
+        wallpaperPosition: w.wallpaperPosition,
       });
     }
     return {
@@ -1998,6 +2057,7 @@ function registerIpc() {
         customBlur: w.customBlur,
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
+        wallpaperPosition: w.wallpaperPosition,
       },
     };
   });
@@ -2047,6 +2107,13 @@ function registerIpc() {
     const w = settingsWidgetFrom(event);
     if (!w) return { ok: false };
     return removeWidget(w);
+  });
+
+  ipcMain.handle('settings:remove-widget', async (event, id) => {
+    if (!settingsWidgetFrom(event)) return { ok: false };
+    const target = widgets.get(id);
+    if (!target) return { ok: false, error: '小组件不存在' };
+    return removeWidget(target);
   });
 
   ipcMain.handle('settings:check-update', async () => {
@@ -2213,6 +2280,8 @@ app.whenReady().then(() => {
         customBlur: item.customBlur,
         iconSize: item.iconSize,
         wallpaperFit: item.wallpaperFit,
+        wallpaperPosition: item.wallpaperPosition,
+        sortMode: item.sortMode,
         autoOpen: first && autoOpen,
       });
       first = false;

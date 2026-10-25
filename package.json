@@ -14,6 +14,7 @@
     "start": "electron .",
     "start:desktop": "electron . --folder \"%USERPROFILE%\\Desktop\"",
     "test": "node test/fsutil.test.js",
+    "test:e2e": "node test/e2e.mjs",
     "postinstall": "node scripts/ensure-electron.js",
     "dist": "electron-builder --win --publish never"
   },
