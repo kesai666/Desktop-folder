@@ -3,12 +3,6 @@
 > 把 Windows 桌面文件夹变成 iPhone 主屏文件夹。
 > 磨砂玻璃、2×2（更小）/ 3×3（标准）/ 4×4（更大）预览、点击展开、多组件；拖放、搜索、排序、回收站撤销，操作的都是真实文件。
 
-![收起态](shots/13-compact-final.png)
-![展开态](shots/15-expanded-noring.png)
-![排列模式](shots/18-arrange.png)
-![磁吸高亮](shots/20-magnet.png)
-![进子文件夹](shots/10-subfolder.png)
-
 ## 为什么做这个
 
 Windows 文件夹信息密度高，但一眼看不出里面装了什么；iPhone 文件夹先给你网格缩略图，点开才是列表。
