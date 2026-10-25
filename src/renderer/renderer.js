@@ -218,6 +218,8 @@ function applyAppearance(info) {
   const wallpaperBlur = state.appearance.wallpaperBlur !== false;
   const wallpaperScale = Math.min(200, Math.max(100, Number(state.appearance.wallpaperScale) || 100));
   const gridSize = [2, 3, 4].includes(Number(state.appearance.gridSize)) ? Number(state.appearance.gridSize) : 3;
+  const miniScale = gridSize === 2 ? 0.9 : gridSize === 4 ? 1.18 : 1;
+  const miniVisual = Math.round(COMPACT.width * miniScale);
   const iconSize = Math.min(76, Math.max(52, Number(state.appearance.iconSize) || 64));
   const fit = state.appearance.wallpaperFit === 'contain' ? 'contain' : 'cover';
   const position = ['center', 'top', 'bottom', 'left', 'right'].includes(state.appearance.wallpaperPosition)
@@ -229,6 +231,8 @@ function applyAppearance(info) {
   el.root.style.setProperty('--tile-icon', `${iconSize}px`);
   el.root.style.setProperty('--mini-cols', String(gridSize));
   el.root.style.setProperty('--mini-rows', String(gridSize));
+  el.root.style.setProperty('--mini-scale', String(miniScale));
+  el.root.style.setProperty('--mini-visual-size', `${miniVisual}px`);
   el.root.style.setProperty('--wp-fit', fit);
   el.root.style.setProperty('--wp-pos', position);
   el.root.style.setProperty('--wp-zoom', String(wallpaperScale / 100));

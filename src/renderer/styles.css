@@ -115,6 +115,8 @@ body.dark .frost {
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.3),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.42);
+  transform: scale(var(--mini-scale, 1));
+  transform-origin: top left;
   transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
   z-index: 2;
 }
@@ -126,7 +128,7 @@ body.dark .frost {
     0 0 26px rgba(124, 202, 255, 0.55),
     0 14px 34px rgba(0, 0, 0, 0.3),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.42);
-  transform: scale(1.04);
+  transform: scale(calc(var(--mini-scale, 1) * 1.04));
 }
 
 #root.magnet .mini-label {
@@ -138,10 +140,10 @@ body.dark .frost {
 
 /* 咔哒落位：短暂放大再回弹 */
 @keyframes click-pop {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.06); }
-  62% { transform: scale(0.985); }
-  100% { transform: scale(1); }
+  0% { transform: scale(var(--mini-scale, 1)); }
+  30% { transform: scale(calc(var(--mini-scale, 1) * 1.06)); }
+  62% { transform: scale(calc(var(--mini-scale, 1) * 0.985)); }
+  100% { transform: scale(var(--mini-scale, 1)); }
 }
 
 #root.click .mini {
@@ -240,8 +242,8 @@ body.dark .frost {
 .mini-label {
   position: absolute;
   left: calc(var(--pad) + var(--ox));
-  top: calc(var(--pad) + var(--oy) + 105px);
-  width: 100px;
+  top: calc(var(--pad) + var(--oy) + var(--mini-visual-size, 100px) + 5px);
+  width: var(--mini-visual-size, 100px);
   z-index: 2;
   text-align: center;
   font-size: 12px;
