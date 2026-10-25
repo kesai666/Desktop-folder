@@ -179,8 +179,8 @@ body.dark .frost {
   z-index: 2;
   padding: 9px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--mini-cols, 3), 1fr);
+  grid-template-rows: repeat(var(--mini-rows, 3), 1fr);
   gap: 5px;
 }
 

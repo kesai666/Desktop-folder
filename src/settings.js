@@ -1,7 +1,7 @@
 'use strict';
 
 const $ = (id) => document.getElementById(id);
-let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true };
+let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true, gridSize: 3 };
 let currentId = null;
 let customWallpaper = null;
 let saveTimer = 0;
@@ -115,6 +115,7 @@ function render(data) {
   $('frost').value = appearance.frost;
   $('customBlur').value = appearance.customBlur;
   $('iconSize').value = appearance.iconSize;
+  $('gridSize').value = appearance.gridSize || 3;
   $('wallpaperFit').value = appearance.wallpaperFit;
   $('wallpaperPosition').value = appearance.wallpaperPosition;
   $('wallpaperScale').value = appearance.wallpaperScale || 100;
@@ -144,6 +145,7 @@ function scheduleSave() {
     frost: Number($('frost').value),
     customBlur: Number($('customBlur').value),
     iconSize: Number($('iconSize').value),
+    gridSize: Number($('gridSize').value),
     wallpaperFit: $('wallpaperFit').value,
     wallpaperPosition: $('wallpaperPosition').value,
     wallpaperScale: Number($('wallpaperScale').value),
@@ -161,6 +163,7 @@ for (const id of ['blur', 'frost', 'customBlur', 'iconSize', 'wallpaperScale']) 
   $(id).addEventListener('input', scheduleSave);
 }
 $('wallpaperFit').addEventListener('change', scheduleSave);
+$('gridSize').addEventListener('change', scheduleSave);
 $('wallpaperPosition').addEventListener('change', scheduleSave);
 $('wallpaperBlur').addEventListener('change', scheduleSave);
 
@@ -170,11 +173,12 @@ $('autoStart').addEventListener('change', async () => {
 });
 
 $('resetAppearance').addEventListener('click', async () => {
-  appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true };
+  appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true, gridSize: 3 };
   $('blur').value = appearance.blur;
   $('frost').value = appearance.frost;
   $('customBlur').value = appearance.customBlur;
   $('iconSize').value = appearance.iconSize;
+  $('gridSize').value = appearance.gridSize;
   $('wallpaperFit').value = appearance.wallpaperFit;
   $('wallpaperPosition').value = appearance.wallpaperPosition;
   $('wallpaperScale').value = appearance.wallpaperScale;

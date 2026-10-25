@@ -47,7 +47,7 @@ const state = {
   display: null,
   wallpaper: null,
   customWallpaper: null,
-  appearance: { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true },
+  appearance: { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true, gridSize: 3 },
   pad: MINI_PAD,
   selection: -1,
   anchor: -1,
@@ -210,12 +210,14 @@ async function startWatching() {
 
 function applyAppearance(info) {
   if (!info) return;
+  const previousGrid = state.appearance.gridSize;
   state.appearance = { ...state.appearance, ...info };
   const blur = Math.min(40, Math.max(0, Number(state.appearance.blur) || 0));
   const frost = Math.min(100, Math.max(0, Number(state.appearance.frost) || 0));
   const customBlur = Math.min(30, Math.max(0, Number(state.appearance.customBlur) || 0));
   const wallpaperBlur = state.appearance.wallpaperBlur !== false;
   const wallpaperScale = Math.min(200, Math.max(100, Number(state.appearance.wallpaperScale) || 100));
+  const gridSize = [2, 3, 4].includes(Number(state.appearance.gridSize)) ? Number(state.appearance.gridSize) : 3;
   const iconSize = Math.min(76, Math.max(52, Number(state.appearance.iconSize) || 64));
   const fit = state.appearance.wallpaperFit === 'contain' ? 'contain' : 'cover';
   const position = ['center', 'top', 'bottom', 'left', 'right'].includes(state.appearance.wallpaperPosition)
@@ -225,9 +227,12 @@ function applyAppearance(info) {
   el.root.style.setProperty('--custom-blur', `${wallpaperBlur ? customBlur : 0}px`);
   el.root.style.setProperty('--frost-alpha', String(frost / 100));
   el.root.style.setProperty('--tile-icon', `${iconSize}px`);
+  el.root.style.setProperty('--mini-cols', String(gridSize));
+  el.root.style.setProperty('--mini-rows', String(gridSize));
   el.root.style.setProperty('--wp-fit', fit);
   el.root.style.setProperty('--wp-pos', position);
   el.root.style.setProperty('--wp-zoom', String(wallpaperScale / 100));
+  if (previousGrid !== gridSize && state.entries.length) render();
 }
 
 function applyLayout() {
@@ -359,7 +364,8 @@ function render() {
   el.back.hidden = state.dir === state.rootDir;
 
   el.miniGrid.replaceChildren();
-  state.entries.slice(0, 9).forEach((entry, i) => el.miniGrid.appendChild(makeTile(entry, i, true)));
+  const miniCount = Math.min(16, Math.max(4, (Number(state.appearance.gridSize) || 3) ** 2));
+  state.entries.slice(0, miniCount).forEach((entry, i) => el.miniGrid.appendChild(makeTile(entry, i, true)));
   el.miniEmpty.hidden = state.entries.length > 0;
 
   el.grid.replaceChildren();

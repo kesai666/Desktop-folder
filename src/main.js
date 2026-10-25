@@ -179,6 +179,7 @@ function saveWidgetConfig(w) {
     item.wallpaperPosition = w.wallpaperPosition;
     item.wallpaperScale = w.wallpaperScale;
     item.wallpaperBlur = w.wallpaperBlur;
+    item.gridSize = w.gridSize;
     item.sortMode = w.sortMode;
   } else {
     config.widgets.push({
@@ -196,6 +197,7 @@ function saveWidgetConfig(w) {
       wallpaperPosition: w.wallpaperPosition,
       wallpaperScale: w.wallpaperScale,
       wallpaperBlur: w.wallpaperBlur,
+      gridSize: w.gridSize,
       sortMode: w.sortMode,
     });
   }
@@ -871,6 +873,7 @@ function createWidget({
   folder, x, y, id, autoOpen = false, wallpaper = null, autoFolder = false,
   blur = 26, frost = 100, customBlur = 10, iconSize = 64, wallpaperFit = 'cover',
   wallpaperPosition = 'center', wallpaperScale = 100, wallpaperBlur = true, sortMode = 'name',
+  gridSize = 3,
 }) {
   const wid = Number.isFinite(id) ? id : nextWidgetId++;
   if (wid >= nextWidgetId) nextWidgetId = wid + 1;
@@ -937,6 +940,7 @@ function createWidget({
     wallpaperPosition: ['center', 'top', 'bottom', 'left', 'right'].includes(wallpaperPosition) ? wallpaperPosition : 'center',
     wallpaperScale: Number.isFinite(wallpaperScale) ? Math.min(200, Math.max(100, Math.round(wallpaperScale))) : 100,
     wallpaperBlur: wallpaperBlur !== false,
+    gridSize: [2, 3, 4].includes(Number(gridSize)) ? Number(gridSize) : 3,
     sortMode: ['name', 'time', 'size', 'type', 'custom'].includes(sortMode) ? sortMode : 'name',
   };
   widgets.set(wid, w);
@@ -1434,6 +1438,7 @@ function registerIpc() {
         wallpaperPosition: w.wallpaperPosition,
         wallpaperScale: w.wallpaperScale,
         wallpaperBlur: w.wallpaperBlur,
+        gridSize: w.gridSize,
       },
       sortMode: w.sortMode,
       dark: nativeTheme.shouldUseDarkColors,
@@ -2098,6 +2103,7 @@ function registerIpc() {
         wallpaperPosition: w.wallpaperPosition,
         wallpaperScale: w.wallpaperScale,
         wallpaperBlur: w.wallpaperBlur,
+        gridSize: w.gridSize,
       },
       customWallpaper: customWallpaperInfo(w),
     };
@@ -2116,6 +2122,7 @@ function registerIpc() {
       : 'center';
     const wallpaperScale = Math.min(200, Math.max(100, Math.round(Number(appearance && appearance.wallpaperScale))));
     const wallpaperBlur = !appearance || appearance.wallpaperBlur !== false;
+    const gridSize = appearance && [2, 3, 4].includes(Number(appearance.gridSize)) ? Number(appearance.gridSize) : 3;
     w.blur = Number.isFinite(blur) ? blur : w.blur;
     w.frost = Number.isFinite(frost) ? frost : w.frost;
     w.customBlur = Number.isFinite(customBlur) ? customBlur : w.customBlur;
@@ -2124,6 +2131,7 @@ function registerIpc() {
     w.wallpaperPosition = wallpaperPosition;
     w.wallpaperScale = Number.isFinite(wallpaperScale) ? wallpaperScale : w.wallpaperScale;
     w.wallpaperBlur = wallpaperBlur;
+    w.gridSize = gridSize;
     saveWidgetConfig(w);
     if (w.win && !w.win.isDestroyed()) {
       w.win.webContents.send('ui:appearance', {
@@ -2135,6 +2143,7 @@ function registerIpc() {
         wallpaperPosition: w.wallpaperPosition,
         wallpaperScale: w.wallpaperScale,
         wallpaperBlur: w.wallpaperBlur,
+        gridSize: w.gridSize,
       });
     }
     return {
@@ -2148,6 +2157,7 @@ function registerIpc() {
         wallpaperPosition: w.wallpaperPosition,
         wallpaperScale: w.wallpaperScale,
         wallpaperBlur: w.wallpaperBlur,
+        gridSize: w.gridSize,
       },
     };
   });
@@ -2401,6 +2411,7 @@ app.whenReady().then(() => {
         wallpaperPosition: item.wallpaperPosition,
         wallpaperScale: item.wallpaperScale,
         wallpaperBlur: item.wallpaperBlur,
+        gridSize: item.gridSize,
         sortMode: item.sortMode,
         autoOpen: first && autoOpen,
       });
