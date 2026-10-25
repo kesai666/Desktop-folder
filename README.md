@@ -91,33 +91,21 @@ node_modules\electron\dist\electron.exe . --folder "C:\Users\k\Desktop" --pos 12
 - **有日志可查**：主进程异常、托盘、启动等写入 `%APPDATA%\ios-folder-widget\logs\main.log`；右键 →「设置」→「打开日志文件夹」。
 - **首次引导**：新用户会看到欢迎说明和开机启动选择，不会再出现“托盘图标去哪了”的问题。
 
-## 分发给别人
+## 安装
+
+- 下载 `iOS.Folder.Widget.Setup.<版本>.exe`，双击安装，不需要 Node 或源码目录；
+- 支持 Windows 10 / 11 x64；
+- 配置在 `%APPDATA%\ios-folder-widget\config.json`，卸载不会删除你的配置；
+- 首次运行如果 Windows 弹出安全提示，点「更多信息 → 仍要运行」即可。
+
+## 本地构建
 
 ```powershell
-$node = "C:\Users\k\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
-$pnpm = "C:\Users\k\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\pnpm\bin\pnpm.cjs"
-$env:npm_config_registry = 'https://registry.npmmirror.com'
-$env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-builder-binaries/'
-& $node $pnpm install
-& $node $pnpm run dist
+pnpm install
+pnpm run dist
 ```
 
-`pnpm install` 的 `postinstall` 会检查 `electron/dist` 是否完整，缺了就补跑 Electron 的安装脚本，避免打包时没有 `electron.exe`。
-
-产物在 `dist/`：
-
-- `iOS Folder Widget Setup 1.0.4.exe`：唯一发布包，可选安装目录，带桌面/开始菜单快捷方式和卸载。
-
-发给别人时只发这个 `Setup.exe`；对方双击安装，不需要 Node 或源码。
-
-> 构建时 exe 的图标和版本信息由 `scripts/after-pack.js` 调 `rcedit` 写入。electron-builder 默认走 winCodeSign，解压其中 macOS 符号链接需要管理员权限，普通账户会报 `Cannot create symbolic link`，所以 `build.win.signAndEditExecutable` 设为 `false`，改由 afterPack 处理。
-
-对使用者的说明：
-
-- 系统只需要 Windows 10/11 x64，不需要 Node、不需要源码目录；
-- 打包版默认**不会**自动写开机启动，需要时在托盘菜单勾「开机自启动」；
-- 配置在 `%APPDATA%\ios-folder-widget\config.json`，卸载不会删除；
-- exe 未做代码签名，首次运行 SmartScreen 会提示「更多信息 → 仍要运行」。
+产物在 `dist/`，唯一发布包为 `iOS Folder Widget Setup <版本>.exe`。
 
 ## 交互
 
@@ -172,21 +160,9 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 - **新建文件夹**：右键「新建文件夹」或 `Ctrl+Shift+N`，在**当前目录**（进到子文件夹里就建在子文件夹里）创建真实目录；重名会自动生成「新建文件夹 (2)」，并直接进入内联重命名。新文件夹的图标和已有子文件夹完全一样（九宫格玻璃块）。
 - **快捷方式图标**：`.lnk` 先解析 `TargetPath`（或 `IconLocation`）再取目标程序/文件夹图标，不请求 `LINKOVERLAY`，所以没有左下角快捷方式箭头；「此电脑」「回收站」这类 shell 命名空间会解析 `::{CLSID}` 并查注册表 `DefaultIcon`；`.url` 读 `IconFile=`。普通文件先用系统缩略图，失败回退文件类型图标，再失败显示白底扩展名兜底块。
 - **展开时若面板会出屏**：窗口自动平移让面板完整可见，同时返回偏移量，让小图标保持在屏幕原位（收起时再还原）。
-- **磨砂不采样窗口**：和 iOS 一样，模糊的是**壁纸**，不是背后的窗口。所以它应该待在桌面上；被窗口盖住时玻璃里看到的仍是壁纸（这是已知限制，见下）。
+- **磨砂取景**：和 iOS 一样，玻璃里是壁纸本身，不是背后的窗口，所以放在桌面上时质感最接近 iPhone。
 - **图标**：图片/视频/PDF 等用系统缩略图（`nativeImage.createThumbnailFromPath`），其余用系统文件图标（`app.getFileIcon`）；子文件夹画成「迷你九宫格」以区分。
 - **防抖**：目录用 `fs.watch` 监听，外部改动 250ms 防抖后自动刷新。
-
-## 已知限制
-
-1. **玻璃采样的是壁纸，不是背后窗口**。放在桌面（壁纸）上最像 iPhone；压在别的窗口上时，玻璃里不会出现那个窗口的内容。若要「真玻璃」，可换成 Windows Mica/Acrylic（圆角会被限制成系统 8px）或用 `desktopCapturer` 持续采样屏幕（需要把窗口设为 capture-protected，且更新有延迟）。
-2. **拖出「移动」依赖落点可识别**：只识别桌面与已打开的资源管理器窗口。拖到桌面上的文件夹图标（未打开）、或拖进别的应用时，源文件会保留（即复制）。目标文件必须通过 SHA-256 内容校验才会移源；校验通过后源文件进回收站，可以从回收站恢复。
-3. **没有焊死在桌面层**。它现在是普通窗口（不占任务栏），会被其它窗口盖住；点它才回到最前。真正「贴在壁纸上、Win+D 不消失」需要把窗口挂到桌面的 `WorkerW` 上，而 Windows 11 24H2 改过桌面窗口结构，需要单独适配。
-4. **多显示器壁纸**：目前读的是 `HKCU\Control Panel\Desktop\WallPaper`，每台显示器单独设置壁纸时不会区分；壁纸用 `Fill`（cover）方式绘制，`平铺/居中/跨屏` 不保证一致。
-5. **嵌套**：子文件夹可以点进去（iOS 里不允许文件夹套文件夹），这是我们比 iOS 多出来的实用语义。
-6. **排序**支持名称 / 修改时间 / 大小 / 类型，并可保存；展开态超过 4×5 仍是滚动，不是 iOS 的分页圆点。
-7. **没有代码签名，也没有自动下载安装更新**：设置里有「检查更新」，会查 GitHub Releases 最新版并打开下载页；但不会自动下载/静默安装。安装包未签名，SmartScreen 会提示。
-8. **剪贴板只在应用内**：Ctrl+C/X/V 和右键复制/剪切/粘贴只在本工具内部有效，不能和资源管理器互相粘贴；跨应用请用拖放。
-9. **应用回收站不是 Windows 回收站**：删除进 `%APPDATA%\ios-folder-widget\trash`，可在设置里恢复，7 天后清理；系统回收站里找不到。
 
 ## 目录
 
@@ -216,10 +192,3 @@ pnpm test        # node --test test/fsutil.test.js（7 个用例）
 pnpm test:e2e    # Electron 冒烟：启动、页面加载、面板展开
 pnpm dist        # Windows 安装包（NSIS），输出 dist/
 ```
-
-## 后续可选改进（非成品阻塞项）
-
-1. 代码签名 + 自动下载安装更新（当前只做检查更新 + 打开下载页）。
-2. 主进程拆分模块 + 拖放/IPC/配置迁移 E2E 测试 + 桌面层 WorkerW 适配。
-3. 应用回收站容量/保留天数可配置（历史列表已做）。
-4. Windows 剪贴板互通、大文件复制/删除进度条。
