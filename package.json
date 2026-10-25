@@ -15,8 +15,8 @@
     "start:desktop": "electron . --folder \"%USERPROFILE%\\Desktop\"",
     "test": "node test/fsutil.test.js",
     "postinstall": "node scripts/ensure-electron.js",
-    "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable"
+    "dist": "electron-builder --win --publish never",
+    "dist:portable": "electron-builder --win portable --publish never"
   },
   "devDependencies": {
     "electron": "45.0.0",
