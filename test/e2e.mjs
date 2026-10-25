@@ -7,6 +7,21 @@ const root = path.resolve(import.meta.dirname, '..');
 const exe = path.join(root, 'node_modules', 'electron', 'dist', 'electron.exe');
 const port = Number(process.env.E2E_PORT || 9444);
 const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'iosf-e2e-'));
+const content = path.join(profile, 'content');
+await fs.mkdir(content, { recursive: true });
+await fs.writeFile(path.join(content, 'hello.txt'), 'e2e', 'utf8');
+await fs.writeFile(path.join(profile, 'config.json'), JSON.stringify({
+  autoStart: false,
+  onboarded: true,
+  widgets: [{
+    id: 1,
+    folder: content,
+    x: 120,
+    y: 120,
+    wallpaper: null,
+    autoCreated: false,
+  }],
+}, null, 2), 'utf8');
 
 const env = { ...process.env };
 delete env.ELECTRON_RUN_AS_NODE;
@@ -93,10 +108,14 @@ try {
   if (!hasRoot) throw new Error('缺少 #root');
 
   await client.evaluate("document.getElementById('miniLabel').click()");
-  await sleep(600);
-  const opened = await client.evaluate("JSON.stringify({ open: document.getElementById('root').classList.contains('open'), width: innerWidth })");
-  const state = JSON.parse(opened);
-  if (!state.open || state.width < 500) throw new Error(`面板没有展开: ${opened}`);
+  let state = { open: false, width: 0 };
+  for (let i = 0; i < 20; i++) {
+    await sleep(200);
+    const opened = await client.evaluate("JSON.stringify({ open: document.getElementById('root').classList.contains('open'), width: innerWidth })");
+    state = JSON.parse(opened);
+    if (state.open) break;
+  }
+  if (!state.open || state.width < 500) throw new Error(`面板没有展开: ${JSON.stringify(state)}`);
 
   console.log('e2e ok: page loaded, panel opened');
 } catch (err) {
