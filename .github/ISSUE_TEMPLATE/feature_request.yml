@@ -1,0 +1,41 @@
+name: 功能建议
+description: 提出一个新功能或体验改进
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢建议。请先搜索现有 Issue，避免重复。
+        安全问题不要在这里发，请使用「私密漏洞报告」。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你想解决什么问题
+      description: 先说场景，不用急着给方案
+      placeholder: 我在...的时候，觉得...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的效果
+      description: 你希望它怎么工作
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 可选方案 / 替代做法（可选）
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 我已经搜索过现有 Issue
+          required: true

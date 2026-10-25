@@ -183,6 +183,12 @@ test/                    文件层单测 + Electron 冒烟测试
 
 </details>
 
+## 反馈
+
+- **Bug / 功能建议**：优先提 [Issue](https://github.com/kesai666/Desktop-folder/issues)。Bug 请附应用版本、Windows 版本和复现步骤；日志在 `%APPDATA%\ios-folder-widget\logs\main.log`。
+- **安全漏洞**：不要公开提交 Issue，请使用 [GitHub 私密漏洞报告](https://github.com/kesai666/Desktop-folder/security/advisories/new)。
+- 不公开邮箱和社交账号；所有反馈尽量留在 Issue 里，方便追踪和搜索。
+
 ## License
 
 [MIT](LICENSE) © 2025-2026 ios-folder-widget contributors

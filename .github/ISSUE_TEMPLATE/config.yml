@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 私密报告安全漏洞
+    url: https://github.com/kesai666/Desktop-folder/security/advisories/new
+    about: 不要公开提交安全漏洞细节，请使用 GitHub 私密漏洞报告。

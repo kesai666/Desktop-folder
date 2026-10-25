@@ -1,0 +1,73 @@
+name: Bug 报告
+description: 报告一个可以复现的问题
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。提交前请先搜索现有 Issue。
+        安全问题不要在这里发，请使用「私密漏洞报告」。
+
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本
+      description: 设置窗口右上角可以看到，例如 v1.0.4
+      placeholder: v1.0.4
+    validations:
+      required: true
+
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows 版本
+      options:
+        - Windows 11
+        - Windows 10
+        - 其他（请在复现步骤里说明）
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从启动开始，尽量写成别人可以照着做的步骤
+      placeholder: |
+        1. 打开...
+        2. 右键...
+        3. 拖入...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 截图（可选）
+      description: 日志在 %APPDATA%\ios-folder-widget\logs\main.log；截图请先遮挡隐私信息
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 我已经搜索过现有 Issue
+          required: true
+        - label: 这不是安全漏洞，且截图/日志里没有隐私信息
+          required: true
