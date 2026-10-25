@@ -1,6 +1,6 @@
 {
   "name": "ios-folder-widget",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "iPhone 风格磨砂玻璃文件夹：外观是 iPhone 主屏文件夹，内里是真实的 Windows 目录。",
   "author": "ios-folder-widget contributors",

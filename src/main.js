@@ -2082,6 +2082,7 @@ function registerIpc() {
     return {
       folder: w.rootDir,
       autoStart: config.autoStart !== false,
+      version: app.getVersion(),
       currentId: w.id,
       widgets: [...widgets.values()].map((item) => ({
         id: item.id,

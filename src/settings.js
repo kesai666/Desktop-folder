@@ -109,6 +109,7 @@ async function renderTrash() {
 
 function render(data) {
   $('folderPath').textContent = data.folder || '';
+  $('version').textContent = data.version ? `v${data.version}` : '';
   appearance = { ...appearance, ...(data.appearance || {}) };
   $('blur').value = appearance.blur;
   $('frost').value = appearance.frost;
