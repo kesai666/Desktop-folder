@@ -644,6 +644,7 @@ async function rootMenu() {
   } else if (action === 'refresh') await refresh();
   else if (action === 'sort') await sortByName();
   else if (action === 'new-folder') await createFolder();
+  else if (action === 'new-shortcut') await createShortcut();
   else if (action === 'add-widget') {
     const res = await api.addWidget();
     if (res && res.ok) toast(`已新建小组件：${res.name}`);
@@ -825,6 +826,27 @@ async function createFolder() {
   const tile = el.grid.querySelector(`.tile[data-idx="${idx}"]`);
   if (tile) tile.scrollIntoView({ block: 'nearest' });
   startRename(entry);
+}
+
+async function createShortcut() {
+  if (!state.open) await open();
+  const res = await api.newShortcut(state.dir);
+  if (!res || !res.ok) {
+    if (res && res.canceled) return;
+    toast((res && res.error) || '创建快捷方式失败');
+    return;
+  }
+  await refresh();
+  const entry = state.entries.find((item) => item.path === res.path || item.name === res.name);
+  if (!entry) return;
+  const idx = state.entries.indexOf(entry);
+  state.selection = idx;
+  state.multi = new Set([idx]);
+  state.anchor = idx;
+  paintSelection();
+  const tile = el.grid.querySelector(`.tile[data-idx="${idx}"]`);
+  if (tile) tile.scrollIntoView({ block: 'nearest' });
+  toast(`已创建快捷方式：${res.name}`);
 }
 
 // ------------------------------------------------------------------ 展开态交互
@@ -1050,6 +1072,15 @@ function wireDrop(target, getDir) {
       .filter(Boolean);
     if (!paths.length) return;
     const dir = getDir();
+    const choice = await api.dropChoice(paths.length);
+    if (choice === 'cancel') return;
+    if (choice === 'shortcut') {
+      const res = await api.dropShortcuts(dir, paths);
+      if (res.errors && res.errors.length) toast(res.errors[0].error);
+      else if (res.created && res.created.length) toast(`已创建 ${res.created.length} 个快捷方式`);
+      await refresh();
+      return;
+    }
     const res = await api.dropPaths(dir, paths);
     if (res.errors && res.errors.length) toast(res.errors[0].error);
     else if (res.moved && res.moved.length) toast(`已移入 ${res.moved.length} 项`);

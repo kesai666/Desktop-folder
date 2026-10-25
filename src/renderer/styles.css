@@ -546,7 +546,7 @@ body.dark .search {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   position: relative;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -566,6 +566,7 @@ body.dark .search {
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
 }
 
 .grid .tile .art img.glyph {
@@ -573,6 +574,7 @@ body.dark .search {
   height: 100%;
   object-fit: contain;
   display: block;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
 }
 
 /* 图标还没取到 / 取不到时的兜底：白底 + 扩展名 */
@@ -582,6 +584,7 @@ body.dark .search {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .mini-grid .art.fallback {
@@ -601,6 +604,7 @@ body.dark .search {
   justify-content: stretch;
   background: linear-gradient(155deg, rgba(112, 150, 200, 0.5), rgba(24, 32, 48, 0.56));
   border: 1px solid rgba(255, 255, 255, 0.36);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .grid .tile .art.subfolder .dot {

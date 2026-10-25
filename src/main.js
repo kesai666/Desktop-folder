@@ -304,6 +304,29 @@ async function restoreTrashBatch(batch) {
   return { ok: restored > 0, restored, errors };
 }
 
+async function createShortcutLink(link, target) {
+  await execFileAsync('powershell', [
+    '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+    '-File', scriptFile('create-shortcut.ps1'), link, target,
+  ], { windowsHide: true, timeout: 8000 });
+}
+
+async function createShortcutsInto(dir, sources) {
+  const result = { created: [], errors: [] };
+  for (const src of sources || []) {
+    try {
+      const base = path.basename(src) || '快捷方式';
+      const name = base.toLowerCase().endsWith('.lnk') ? base : `${base}.lnk`;
+      const link = await fsutil.uniquePath(dir, name);
+      await createShortcutLink(link, src);
+      result.created.push({ src, dest: link });
+    } catch (err) {
+      result.errors.push({ src, error: err.message });
+    }
+  }
+  return result;
+}
+
 // ---------------------------------------------------------------- 开机自启动
 
 /**
@@ -1594,6 +1617,26 @@ function registerIpc() {
 
   ipcMain.handle('item:drop', async (e, dir, sources) => fsutil.moveInto(dir, sources));
 
+  ipcMain.handle('item:drop-choice', async (event, count) => {
+    const w = widgetFrom(event);
+    if (!w || !w.win) return 'move';
+    suppressBlurUntil = Date.now() + 15000;
+    const res = await dialog.showMessageBox(w.win, {
+      type: 'question',
+      title: '放入文件',
+      message: `要如何处理这 ${count} 项？`,
+      detail: '移动会改变文件位置；创建快捷方式只在当前文件夹生成 .lnk，原文件留在原处。',
+      buttons: ['移动到这里', '创建快捷方式', '取消'],
+      defaultId: 0,
+      cancelId: 2,
+      noLink: true,
+    });
+    suppressBlurUntil = Date.now() + 600;
+    return ['move', 'shortcut', 'cancel'][res.response] || 'cancel';
+  });
+
+  ipcMain.handle('item:drop-shortcuts', async (e, dir, sources) => createShortcutsInto(dir, sources));
+
   ipcMain.handle('item:new-folder', async (e, dir) => {
     try {
       const st = await fsp.stat(dir);
@@ -1601,6 +1644,30 @@ function registerIpc() {
       const target = await fsutil.uniquePath(dir, '新建文件夹');
       await fsp.mkdir(target);
       return { ok: true, name: path.basename(target), path: target };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('item:new-shortcut', async (event, dir) => {
+    const w = widgetFrom(event);
+    if (!w || !w.win) return { ok: false };
+    const st = await fsp.stat(dir).catch(() => null);
+    if (!st || !st.isDirectory()) return { ok: false, error: '目标不是文件夹' };
+    suppressBlurUntil = Date.now() + 15000;
+    const picked = await dialog.showOpenDialog(w.win, {
+      title: '选择快捷方式目标',
+      buttonLabel: '创建快捷方式',
+      properties: ['openFile', 'openDirectory'],
+    });
+    suppressBlurUntil = Date.now() + 600;
+    if (picked.canceled || !picked.filePaths.length) return { ok: false, canceled: true };
+    const target = picked.filePaths[0];
+    try {
+      const base = path.basename(target) || '快捷方式';
+      const link = await fsutil.uniquePath(dir, `${base}.lnk`);
+      await createShortcutLink(link, target);
+      return { ok: true, path: link, name: path.basename(link), target };
     } catch (err) {
       return { ok: false, error: err.message };
     }
@@ -1915,6 +1982,7 @@ function registerIpc() {
       { label: '打开', click: () => 'open' },
       { label: '在资源管理器中打开', click: () => 'open-root' },
       { label: '新建文件夹', click: () => 'new-folder' },
+      { label: '新建快捷方式…', click: () => 'new-shortcut' },
       { label: '粘贴', click: () => 'paste' },
       {
         label: '设置',
