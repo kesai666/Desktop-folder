@@ -1,6 +1,6 @@
 {
   "name": "ios-folder-widget",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "iPhone 风格磨砂玻璃文件夹：外观是 iPhone 主屏文件夹，内里是真实的 Windows 目录。",
   "author": "ios-folder-widget contributors",
@@ -57,8 +57,9 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
+      "include": "build/installer.nsh",
       "shortcutName": "iOS Folder Widget"
     }
   },

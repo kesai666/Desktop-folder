@@ -112,7 +112,7 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 
 产物在 `dist/`：
 
-- `iOS Folder Widget Setup 1.0.1.exe`：唯一发布包，可选安装目录，带桌面/开始菜单快捷方式和卸载。
+- `iOS Folder Widget Setup 1.0.2.exe`：唯一发布包，可选安装目录，带桌面/开始菜单快捷方式和卸载。
 
 发给别人时只发这个 `Setup.exe`；对方双击安装，不需要 Node 或源码。
 
