@@ -81,7 +81,12 @@ try {
   const client = await connect(page);
   ws = client.ws;
 
-  const title = await client.evaluate('document.title');
+  let title = '';
+  for (let i = 0; i < 40; i++) {
+    title = await client.evaluate('document.title');
+    if (title) break;
+    await sleep(250);
+  }
   if (title !== 'iOS Folder') throw new Error(`页面标题不对: ${title}`);
 
   const hasRoot = await client.evaluate("!!document.querySelector('#root')");
