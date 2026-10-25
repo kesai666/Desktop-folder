@@ -306,7 +306,6 @@ function applyIcon(art, icon) {
     img.className = 'thumb';
   } else {
     img.className = 'glyph';
-    art.classList.add('glyph-plate');
   }
   art.appendChild(img);
 }
