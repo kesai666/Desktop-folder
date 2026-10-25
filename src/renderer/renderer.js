@@ -47,7 +47,7 @@ const state = {
   display: null,
   wallpaper: null,
   customWallpaper: null,
-  appearance: { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center' },
+  appearance: { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true },
   pad: MINI_PAD,
   selection: -1,
   anchor: -1,
@@ -214,17 +214,20 @@ function applyAppearance(info) {
   const blur = Math.min(40, Math.max(0, Number(state.appearance.blur) || 0));
   const frost = Math.min(100, Math.max(0, Number(state.appearance.frost) || 0));
   const customBlur = Math.min(30, Math.max(0, Number(state.appearance.customBlur) || 0));
+  const wallpaperBlur = state.appearance.wallpaperBlur !== false;
+  const wallpaperScale = Math.min(200, Math.max(100, Number(state.appearance.wallpaperScale) || 100));
   const iconSize = Math.min(76, Math.max(52, Number(state.appearance.iconSize) || 64));
   const fit = state.appearance.wallpaperFit === 'contain' ? 'contain' : 'cover';
   const position = ['center', 'top', 'bottom', 'left', 'right'].includes(state.appearance.wallpaperPosition)
     ? state.appearance.wallpaperPosition
     : 'center';
   el.root.style.setProperty('--wp-blur', `${blur}px`);
-  el.root.style.setProperty('--custom-blur', `${customBlur}px`);
+  el.root.style.setProperty('--custom-blur', `${wallpaperBlur ? customBlur : 0}px`);
   el.root.style.setProperty('--frost-alpha', String(frost / 100));
   el.root.style.setProperty('--tile-icon', `${iconSize}px`);
   el.root.style.setProperty('--wp-fit', fit);
   el.root.style.setProperty('--wp-pos', position);
+  el.root.style.setProperty('--wp-zoom', String(wallpaperScale / 100));
 }
 
 function applyLayout() {

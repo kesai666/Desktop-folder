@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+        content="default-src 'self'; img-src 'self' data: file:; style-src 'self' 'unsafe-inline'; script-src 'self';" />
   <title>设置</title>
   <link rel="stylesheet" href="settings.css" />
 </head>
@@ -21,6 +21,48 @@
     </section>
 
     <section>
+      <h2>文件夹壁纸</h2>
+      <div class="wp-preview" id="wpPreview">
+        <span id="wpEmpty">未设置自定义壁纸，当前使用桌面壁纸</span>
+        <img id="wpPreviewImg" alt="" hidden />
+      </div>
+      <div class="buttons">
+        <button id="chooseWallpaper">选择壁纸…</button>
+        <button id="clearWallpaper">清除壁纸</button>
+      </div>
+      <label class="check wp-check">
+        <input id="wallpaperBlur" type="checkbox" />
+        <span>模糊壁纸</span>
+      </label>
+      <label class="range">
+        <span>壁纸缩放 <output id="wallpaperScaleValue"></output></span>
+        <input id="wallpaperScale" type="range" min="100" max="200" step="1" />
+      </label>
+      <label class="range">
+        <span>壁纸模糊强度 <output id="customBlurValue"></output></span>
+        <input id="customBlur" type="range" min="0" max="30" step="1" />
+      </label>
+      <label class="select">
+        <span>裁剪方式</span>
+        <select id="wallpaperFit">
+          <option value="cover">铺满裁剪</option>
+          <option value="contain">完整显示</option>
+        </select>
+      </label>
+      <label class="select">
+        <span>裁剪位置</span>
+        <select id="wallpaperPosition">
+          <option value="center">居中</option>
+          <option value="top">靠上</option>
+          <option value="bottom">靠下</option>
+          <option value="left">靠左</option>
+          <option value="right">靠右</option>
+        </select>
+      </label>
+      <p class="hint" id="wpName">当前：桌面壁纸</p>
+    </section>
+
+    <section>
       <h2>外观</h2>
       <label class="range">
         <span>玻璃模糊 <output id="blurValue"></output></span>
@@ -31,29 +73,8 @@
         <input id="frost" type="range" min="0" max="100" step="5" />
       </label>
       <label class="range">
-        <span>自定义壁纸模糊 <output id="customBlurValue"></output></span>
-        <input id="customBlur" type="range" min="0" max="30" step="1" />
-      </label>
-      <label class="range">
         <span>图标大小 <output id="iconSizeValue"></output></span>
         <input id="iconSize" type="range" min="52" max="76" step="1" />
-      </label>
-      <label class="select">
-        <span>壁纸显示方式</span>
-        <select id="wallpaperFit">
-          <option value="cover">铺满裁剪</option>
-          <option value="contain">完整显示</option>
-        </select>
-      </label>
-      <label class="select">
-        <span>壁纸位置</span>
-        <select id="wallpaperPosition">
-          <option value="center">居中</option>
-          <option value="top">靠上</option>
-          <option value="bottom">靠下</option>
-          <option value="left">靠左</option>
-          <option value="right">靠右</option>
-        </select>
       </label>
       <div class="buttons">
         <button id="resetAppearance">恢复默认外观</button>

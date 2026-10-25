@@ -177,6 +177,8 @@ function saveWidgetConfig(w) {
     item.iconSize = w.iconSize;
     item.wallpaperFit = w.wallpaperFit;
     item.wallpaperPosition = w.wallpaperPosition;
+    item.wallpaperScale = w.wallpaperScale;
+    item.wallpaperBlur = w.wallpaperBlur;
     item.sortMode = w.sortMode;
   } else {
     config.widgets.push({
@@ -192,6 +194,8 @@ function saveWidgetConfig(w) {
       iconSize: w.iconSize,
       wallpaperFit: w.wallpaperFit,
       wallpaperPosition: w.wallpaperPosition,
+      wallpaperScale: w.wallpaperScale,
+      wallpaperBlur: w.wallpaperBlur,
       sortMode: w.sortMode,
     });
   }
@@ -866,7 +870,7 @@ function widgetFrom(event) {
 function createWidget({
   folder, x, y, id, autoOpen = false, wallpaper = null, autoFolder = false,
   blur = 26, frost = 100, customBlur = 10, iconSize = 64, wallpaperFit = 'cover',
-  wallpaperPosition = 'center', sortMode = 'name',
+  wallpaperPosition = 'center', wallpaperScale = 100, wallpaperBlur = true, sortMode = 'name',
 }) {
   const wid = Number.isFinite(id) ? id : nextWidgetId++;
   if (wid >= nextWidgetId) nextWidgetId = wid + 1;
@@ -931,6 +935,8 @@ function createWidget({
     iconSize: Number.isFinite(iconSize) ? Math.min(76, Math.max(52, Math.round(iconSize))) : 64,
     wallpaperFit: wallpaperFit === 'contain' ? 'contain' : 'cover',
     wallpaperPosition: ['center', 'top', 'bottom', 'left', 'right'].includes(wallpaperPosition) ? wallpaperPosition : 'center',
+    wallpaperScale: Number.isFinite(wallpaperScale) ? Math.min(200, Math.max(100, Math.round(wallpaperScale))) : 100,
+    wallpaperBlur: wallpaperBlur !== false,
     sortMode: ['name', 'time', 'size', 'type', 'custom'].includes(sortMode) ? sortMode : 'name',
   };
   widgets.set(wid, w);
@@ -1086,7 +1092,7 @@ function openSettings(w) {
   }
   settingsWin = new BrowserWindow({
     width: 480,
-    height: 620,
+    height: 700,
     minWidth: 440,
     minHeight: 520,
     title: `设置 — ${path.basename(w.rootDir)}`,
@@ -1425,6 +1431,8 @@ function registerIpc() {
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
         wallpaperPosition: w.wallpaperPosition,
+        wallpaperScale: w.wallpaperScale,
+        wallpaperBlur: w.wallpaperBlur,
       },
       sortMode: w.sortMode,
       dark: nativeTheme.shouldUseDarkColors,
@@ -2085,7 +2093,10 @@ function registerIpc() {
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
         wallpaperPosition: w.wallpaperPosition,
+        wallpaperScale: w.wallpaperScale,
+        wallpaperBlur: w.wallpaperBlur,
       },
+      customWallpaper: customWallpaperInfo(w),
     };
   });
 
@@ -2100,12 +2111,16 @@ function registerIpc() {
     const wallpaperPosition = appearance && ['center', 'top', 'bottom', 'left', 'right'].includes(appearance.wallpaperPosition)
       ? appearance.wallpaperPosition
       : 'center';
+    const wallpaperScale = Math.min(200, Math.max(100, Math.round(Number(appearance && appearance.wallpaperScale))));
+    const wallpaperBlur = !appearance || appearance.wallpaperBlur !== false;
     w.blur = Number.isFinite(blur) ? blur : w.blur;
     w.frost = Number.isFinite(frost) ? frost : w.frost;
     w.customBlur = Number.isFinite(customBlur) ? customBlur : w.customBlur;
     w.iconSize = Number.isFinite(iconSize) ? iconSize : w.iconSize;
     w.wallpaperFit = wallpaperFit;
     w.wallpaperPosition = wallpaperPosition;
+    w.wallpaperScale = Number.isFinite(wallpaperScale) ? wallpaperScale : w.wallpaperScale;
+    w.wallpaperBlur = wallpaperBlur;
     saveWidgetConfig(w);
     if (w.win && !w.win.isDestroyed()) {
       w.win.webContents.send('ui:appearance', {
@@ -2115,6 +2130,8 @@ function registerIpc() {
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
         wallpaperPosition: w.wallpaperPosition,
+        wallpaperScale: w.wallpaperScale,
+        wallpaperBlur: w.wallpaperBlur,
       });
     }
     return {
@@ -2126,8 +2143,38 @@ function registerIpc() {
         iconSize: w.iconSize,
         wallpaperFit: w.wallpaperFit,
         wallpaperPosition: w.wallpaperPosition,
+        wallpaperScale: w.wallpaperScale,
+        wallpaperBlur: w.wallpaperBlur,
       },
     };
+  });
+
+  ipcMain.handle('settings:choose-wallpaper', async (event) => {
+    const w = settingsWidgetFrom(event);
+    if (!w) return { ok: false };
+    const res = await dialog.showOpenDialog(settingsWin, {
+      title: '选择这个文件夹的壁纸',
+      properties: ['openFile'],
+      filters: [{
+        name: '图片',
+        extensions: ['png', 'jpg', 'jpeg', 'webp', 'bmp', 'gif', 'avif'],
+      }],
+    });
+    if (res.canceled || !res.filePaths.length) return { ok: false, canceled: true };
+    w.wallpaper = res.filePaths[0];
+    saveWidgetConfig(w);
+    const info = customWallpaperInfo(w);
+    if (w.win && !w.win.isDestroyed()) w.win.webContents.send('ui:wallpaper', { customWallpaper: info });
+    return { ok: true, customWallpaper: info };
+  });
+
+  ipcMain.handle('settings:clear-wallpaper', async (event) => {
+    const w = settingsWidgetFrom(event);
+    if (!w) return { ok: false };
+    w.wallpaper = null;
+    saveWidgetConfig(w);
+    if (w.win && !w.win.isDestroyed()) w.win.webContents.send('ui:wallpaper', { customWallpaper: null });
+    return { ok: true, customWallpaper: null };
   });
 
   ipcMain.handle('settings:auto-start', async (event, enabled) => {
@@ -2349,6 +2396,8 @@ app.whenReady().then(() => {
         iconSize: item.iconSize,
         wallpaperFit: item.wallpaperFit,
         wallpaperPosition: item.wallpaperPosition,
+        wallpaperScale: item.wallpaperScale,
+        wallpaperBlur: item.wallpaperBlur,
         sortMode: item.sortMode,
         autoOpen: first && autoOpen,
       });

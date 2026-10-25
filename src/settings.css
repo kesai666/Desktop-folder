@@ -67,6 +67,40 @@ section {
 
 .hint { margin: 6px 0 0; font-size: 11px; color: var(--muted); }
 
+.wp-preview {
+  position: relative;
+  height: 140px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(150deg, #cbd9e6, #b7c7d7);
+}
+
+.wp-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform-origin: center;
+}
+
+.wp-preview span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(30, 40, 55, 0.7);
+}
+
+.wp-preview [hidden] { display: none; }
+
+.wp-check { margin: 10px 0; }
+
 .range { display: block; margin: 10px 0; }
 .range span {
   display: flex; justify-content: space-between;

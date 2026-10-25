@@ -5,6 +5,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('settings', {
   get: () => ipcRenderer.invoke('settings:get'),
   setAppearance: (appearance) => ipcRenderer.invoke('settings:appearance', appearance),
+  chooseWallpaper: () => ipcRenderer.invoke('settings:choose-wallpaper'),
+  clearWallpaper: () => ipcRenderer.invoke('settings:clear-wallpaper'),
   setAutoStart: (enabled) => ipcRenderer.invoke('settings:auto-start', enabled),
   addWidget: () => ipcRenderer.invoke('settings:add-widget'),
   removeWidget: (id) => ipcRenderer.invoke('settings:remove-widget', id),

@@ -64,6 +64,8 @@ body {
 .wp.custom {
   background-size: var(--wp-fit, cover);
   background-position: var(--wp-pos, center);
+  transform: scale(var(--wp-zoom, 1));
+  transform-origin: center;
   filter: blur(var(--custom-blur, 10px)) saturate(1.18) brightness(0.98);
 }
 

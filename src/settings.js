@@ -1,9 +1,31 @@
 'use strict';
 
 const $ = (id) => document.getElementById(id);
-let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center' };
+let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true };
 let currentId = null;
+let customWallpaper = null;
 let saveTimer = 0;
+
+function renderPreview() {
+  const img = $('wpPreviewImg');
+  const empty = $('wpEmpty');
+  const name = $('wpName');
+  if (!customWallpaper || !customWallpaper.fileUrl) {
+    img.hidden = true;
+    empty.hidden = false;
+    if (name) name.textContent = '当前：桌面壁纸';
+    return;
+  }
+  empty.hidden = true;
+  img.hidden = false;
+  img.src = customWallpaper.fileUrl;
+  img.style.objectFit = appearance.wallpaperFit;
+  img.style.objectPosition = appearance.wallpaperPosition;
+  img.style.transform = `scale(${(appearance.wallpaperScale || 100) / 100})`;
+  img.style.filter = appearance.wallpaperBlur ? `blur(${appearance.customBlur}px)` : 'none';
+  const base = String(customWallpaper.file || '').split(/[\\/]/).pop();
+  if (name) name.textContent = `当前：${base || '自定义壁纸'}`;
+}
 
 function setStatus(text) {
   $('status').textContent = text;
@@ -94,11 +116,16 @@ function render(data) {
   $('iconSize').value = appearance.iconSize;
   $('wallpaperFit').value = appearance.wallpaperFit;
   $('wallpaperPosition').value = appearance.wallpaperPosition;
+  $('wallpaperScale').value = appearance.wallpaperScale || 100;
+  $('wallpaperBlur').checked = appearance.wallpaperBlur !== false;
   $('blurValue').textContent = `${appearance.blur}px`;
   $('frostValue').textContent = `${appearance.frost}%`;
   $('customBlurValue').textContent = `${appearance.customBlur}px`;
   $('iconSizeValue').textContent = `${appearance.iconSize}px`;
+  $('wallpaperScaleValue').textContent = `${appearance.wallpaperScale || 100}%`;
   $('autoStart').checked = data.autoStart !== false;
+  customWallpaper = data.customWallpaper || null;
+  renderPreview();
 }
 
 function syncLabels() {
@@ -106,6 +133,7 @@ function syncLabels() {
   $('frostValue').textContent = `${$('frost').value}%`;
   $('customBlurValue').textContent = `${$('customBlur').value}px`;
   $('iconSizeValue').textContent = `${$('iconSize').value}px`;
+  $('wallpaperScaleValue').textContent = `${$('wallpaperScale').value}%`;
 }
 
 function scheduleSave() {
@@ -117,7 +145,10 @@ function scheduleSave() {
     iconSize: Number($('iconSize').value),
     wallpaperFit: $('wallpaperFit').value,
     wallpaperPosition: $('wallpaperPosition').value,
+    wallpaperScale: Number($('wallpaperScale').value),
+    wallpaperBlur: $('wallpaperBlur').checked,
   };
+  renderPreview();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
     const res = await window.settings.setAppearance(appearance);
@@ -125,11 +156,12 @@ function scheduleSave() {
   }, 80);
 }
 
-for (const id of ['blur', 'frost', 'customBlur', 'iconSize']) {
+for (const id of ['blur', 'frost', 'customBlur', 'iconSize', 'wallpaperScale']) {
   $(id).addEventListener('input', scheduleSave);
 }
 $('wallpaperFit').addEventListener('change', scheduleSave);
 $('wallpaperPosition').addEventListener('change', scheduleSave);
+$('wallpaperBlur').addEventListener('change', scheduleSave);
 
 $('autoStart').addEventListener('change', async () => {
   const res = await window.settings.setAutoStart($('autoStart').checked);
@@ -137,16 +169,41 @@ $('autoStart').addEventListener('change', async () => {
 });
 
 $('resetAppearance').addEventListener('click', async () => {
-  appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center' };
+  appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover', wallpaperPosition: 'center', wallpaperScale: 100, wallpaperBlur: true };
   $('blur').value = appearance.blur;
   $('frost').value = appearance.frost;
   $('customBlur').value = appearance.customBlur;
   $('iconSize').value = appearance.iconSize;
   $('wallpaperFit').value = appearance.wallpaperFit;
   $('wallpaperPosition').value = appearance.wallpaperPosition;
+  $('wallpaperScale').value = appearance.wallpaperScale;
+  $('wallpaperBlur').checked = appearance.wallpaperBlur;
+  renderPreview();
+  $('wallpaperFit').value = appearance.wallpaperFit;
+  $('wallpaperPosition').value = appearance.wallpaperPosition;
   syncLabels();
   const res = await window.settings.setAppearance(appearance);
   if (res && res.ok) setStatus('已恢复默认外观');
+});
+
+$('chooseWallpaper').addEventListener('click', async () => {
+  const res = await window.settings.chooseWallpaper();
+  if (res && res.ok) {
+    customWallpaper = res.customWallpaper || null;
+    renderPreview();
+    setStatus('壁纸已应用');
+  } else if (res && res.error) {
+    setStatus(res.error);
+  }
+});
+
+$('clearWallpaper').addEventListener('click', async () => {
+  const res = await window.settings.clearWallpaper();
+  if (res && res.ok) {
+    customWallpaper = null;
+    renderPreview();
+    setStatus('已恢复桌面壁纸');
+  }
 });
 
 $('addWidget').addEventListener('click', async () => {
