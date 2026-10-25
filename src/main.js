@@ -1080,14 +1080,15 @@ function settingsWidgetFrom(event) {
   return widgets.get(settingsWidgetId) || null;
 }
 
-function openSettings(w) {
+function openSettings(w, section = '') {
   if (!w) return;
   settingsWidgetId = w.id;
+  const hash = section === 'wallpaper' ? 'wallpaper' : '';
   if (settingsWin && !settingsWin.isDestroyed()) {
     settingsWin.setTitle(`设置 — ${path.basename(w.rootDir)}`);
     settingsWin.show();
     settingsWin.focus();
-    settingsWin.webContents.reload();
+    settingsWin.loadFile(path.join(__dirname, 'settings.html'), hash ? { hash } : undefined);
     return;
   }
   settingsWin = new BrowserWindow({
@@ -1110,7 +1111,7 @@ function openSettings(w) {
     },
   });
   settingsWin.setMenuBarVisibility(false);
-  settingsWin.loadFile(path.join(__dirname, 'settings.html'));
+  settingsWin.loadFile(path.join(__dirname, 'settings.html'), hash ? { hash } : undefined);
   settingsWin.once('ready-to-show', () => settingsWin.show());
   settingsWin.on('closed', () => {
     settingsWin = null;
@@ -1992,6 +1993,7 @@ function registerIpc() {
       { label: '新建文件夹', click: () => 'new-folder' },
       { label: '新建快捷方式…', click: () => 'new-shortcut' },
       { label: '粘贴', click: () => 'paste' },
+      { label: '壁纸与外观…', click: () => 'open-wallpaper-settings' },
       {
         label: '设置',
         submenu: [
@@ -2067,10 +2069,10 @@ function registerIpc() {
     ]);
   });
 
-  ipcMain.handle('settings:open', async (event) => {
+  ipcMain.handle('settings:open', async (event, section) => {
     const w = widgetFrom(event);
     if (!w) return { ok: false };
-    openSettings(w);
+    openSettings(w, section);
     return { ok: true };
   });
 

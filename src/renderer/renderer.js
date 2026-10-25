@@ -623,6 +623,7 @@ async function rootMenu() {
     const res = await api.openItem(state.dir);
     if (!res.ok) toast(res.error || '打不开这个文件夹');
   } else if (action === 'open-settings') await api.openSettings();
+  else if (action === 'open-wallpaper-settings') await api.openSettings('wallpaper');
   else if (action === 'choose') await chooseFolder();
   else if (action.startsWith('sort-')) {
     state.sortMode = action.slice(5);

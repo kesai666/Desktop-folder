@@ -254,4 +254,9 @@ window.settings.get().then((data) => {
   render(data);
   renderWidgets(data);
   renderTrash().catch(() => {});
+  if (location.hash === '#wallpaper') {
+    setTimeout(() => {
+      document.getElementById('wpPreview')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 120);
+  }
 }).catch(() => setStatus('读取设置失败'));
