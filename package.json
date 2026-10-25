@@ -1,0 +1,69 @@
+{
+  "name": "ios-folder-widget",
+  "version": "0.1.0",
+  "private": true,
+  "description": "iPhone 风格磨砂玻璃文件夹：外观是 iPhone 主屏文件夹，内里是真实的 Windows 目录。",
+  "author": "ios-folder-widget contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kesai666/Desktop-folder.git"
+  },
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:desktop": "electron . --folder \"%USERPROFILE%\\Desktop\"",
+    "test": "node test/fsutil.test.js",
+    "postinstall": "node scripts/ensure-electron.js",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "24.13.3",
+    "rcedit": "4.0.1"
+  },
+  "build": {
+    "appId": "com.local.iosfolderwidget",
+    "productName": "iOS Folder Widget",
+    "electronDist": "node_modules/electron/dist",
+    "afterPack": "scripts/after-pack.js",
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "scripts/extract-icon.ps1",
+      "scripts/resolve-drop.ps1",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "scripts/**/*",
+      "assets/tray.ico",
+      "assets/tray.png"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "iOS Folder Widget"
+    }
+  },
+  "dependencies": {
+    "electron-log": "5.2.4"
+  }
+}

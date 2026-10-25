@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <title>设置</title>
+  <link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+  <header>
+    <h1>设置</h1>
+    <button id="closeBtn" title="关闭">×</button>
+  </header>
+
+  <main>
+    <section>
+      <h2>文件夹</h2>
+      <div class="path" id="folderPath"></div>
+      <p class="hint">右键小组件 →「设置」→「换个文件夹…」可以更换目录。</p>
+    </section>
+
+    <section>
+      <h2>外观</h2>
+      <label class="range">
+        <span>玻璃模糊 <output id="blurValue"></output></span>
+        <input id="blur" type="range" min="0" max="40" step="1" />
+      </label>
+      <label class="range">
+        <span>霜白强度 <output id="frostValue"></output></span>
+        <input id="frost" type="range" min="0" max="100" step="5" />
+      </label>
+      <label class="range">
+        <span>自定义壁纸模糊 <output id="customBlurValue"></output></span>
+        <input id="customBlur" type="range" min="0" max="30" step="1" />
+      </label>
+    </section>
+
+    <section>
+      <h2>行为</h2>
+      <label class="check">
+        <input id="autoStart" type="checkbox" />
+        <span>开机自启动</span>
+      </label>
+    </section>
+
+    <section>
+      <h2>维护</h2>
+      <div class="buttons">
+        <button id="openLogs">打开日志文件夹</button>
+        <button id="openTrash">打开应用回收站</button>
+        <button id="emptyTrash">清空应用回收站</button>
+        <button id="checkUpdate">检查更新</button>
+      </div>
+    </section>
+
+    <footer>
+      <button id="removeBtn" class="danger">移除这个小组件</button>
+      <span id="status"></span>
+    </footer>
+  </main>
+
+  <script src="settings.js"></script>
+</body>
+</html>
