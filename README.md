@@ -2,7 +2,7 @@
 
 <img src="assets/icon.png" width="96" alt="iOS Folder Widget" />
 
-<h1>iOS Folder Widget</h1>
+<h1>Desktop-folder</h1>
 
 <p><strong>把 Windows 桌面文件夹，变成 iPhone 主屏文件夹。</strong></p>
 
