@@ -1,194 +1,194 @@
-# iOS Folder Widget
+<div align="center">
 
-> 把 Windows 桌面文件夹变成 iPhone 主屏文件夹。
-> 磨砂玻璃、2×2（更小）/ 3×3（标准）/ 4×4（更大）预览、点击展开、多组件；拖放、搜索、排序、回收站撤销，操作的都是真实文件。
+<img src="assets/icon.png" width="96" alt="iOS Folder Widget" />
 
-## 为什么做这个
+<h1>iOS Folder Widget</h1>
 
-Windows 文件夹信息密度高，但一眼看不出里面装了什么；iPhone 文件夹先给你网格缩略图，点开才是列表。
+<p><strong>把 Windows 桌面文件夹，变成 iPhone 主屏文件夹。</strong></p>
 
-这个工具把两者接在一起：桌面上看到的是 iPhone 风格文件夹，背后仍然是普通 Windows 目录。它不移动文件、不接管资源管理器，只是给目录换了一个更适合桌面的入口。
+<p>真实目录 · 磨砂玻璃 · 点击展开 · 多组件 · 拖放操作</p>
 
-- 想快速看里面有什么：收起态网格预览，可切 2×2（整体更小）/ 3×3（标准）/ 4×4（整体更大）；
-- 想操作文件：点开就是真实目录，双击打开、拖入拖出、右键菜单；
-- 想分开整理：一个组件绑一个目录，可以同时摆多个；
-- 想整理图标：自由排列、搜索、按时间/大小/类型排序、框选多选。
+<a href="https://github.com/kesai666/Desktop-folder/releases/latest">
+  <img src="https://img.shields.io/github/v/release/kesai666/Desktop-folder?label=%E4%B8%8B%E8%BD%BD%E6%9C%80%E6%96%B0%E7%89%88&style=for-the-badge&color=2ea44f" alt="下载最新版" />
+</a>
+<img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 10 / 11" />
+<img src="https://img.shields.io/badge/License-MIT-3DA639?style=for-the-badge" alt="MIT License" />
 
-## 下载
+</div>
 
-[![build](https://github.com/kesai666/Desktop-folder/actions/workflows/build.yml/badge.svg)](https://github.com/kesai666/Desktop-folder/actions/workflows/build.yml)
-[![release](https://img.shields.io/github/v/release/kesai666/Desktop-folder)](https://github.com/kesai666/Desktop-folder/releases)
-
-- [下载最新版](https://github.com/kesai666/Desktop-folder/releases/latest)
-- 唯一发布包：`iOS.Folder.Widget.Setup.<版本>.exe`（安装版）
+---
 
 ## 它是什么
 
-iPhone 的文件夹是「图标的分组视图」，Windows 的文件夹是「真实目录」。这个工具把两者接在一起：
+iPhone 的文件夹是桌面上的一个小方块：先让你看到里面有什么，点开才展开。
 
-| 你看到的 | 实际发生的事 |
-|---|---|
-| 圆角磨砂玻璃、2×2 / 3×3 / 4×4 预览、下方小字名字 | 窗口自绘的玻璃外观（圆角、模糊、霜白叠层） |
-| 点一下原地放大成多行面板 | 窗口从小图标尺寸放大到面板尺寸，内容浮出 |
-| 里面的每个图标 | 目录里的真实文件 / 子文件夹 |
-| 快捷方式（.lnk） | 解析目标程序/文件夹后取图标，不显示左下角快捷方式箭头 |
-| 拖文件进面板 | 真的移动到该目录（同名自动改 `a (2).txt`） |
-| 把图标拖出去 | 真的拖到桌面 / 资源管理器（原生拖放） |
-| 删除 | 进应用回收站，`Ctrl+Z` 撤销，7 天后自动清理 |
-| 右键 | 打开 / 在资源管理器中显示 / 重命名 / 删除 |
+**iOS Folder Widget 把这个体验搬到 Windows。**
 
-## 运行
+桌面上看到的是圆角、磨砂、带网格预览的 iPhone 文件夹；点开之后，里面是你的真实文件：双击打开、右键菜单、拖入拖出、搜索排序，全都直接作用在磁盘目录上。
 
-环境：Windows 11（磨砂与圆角依赖系统的 DPI/合成能力），Node 20+。
+> 不是快捷方式套壳，也不是虚拟目录。每个小组件背后，都是一个真实文件夹。
 
-```powershell
-# 安装依赖（走国内镜像）。本机没有系统 npm，用 DSH 自带的 Node + pnpm：
-$node = "C:\Users\k\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe"
-$pnpm = "C:\Users\k\.dsh\dsh-runtimes\dsh-primary-runtime\dependencies\pnpm\bin\pnpm.cjs"
-$env:npm_config_registry = 'https://registry.npmmirror.com'
-$env:ELECTRON_MIRROR = 'https://npmmirror.com/mirrors/electron/'
-& $node $pnpm install
+## 为什么用它
 
-# 启动（指定要展示的目录）
-$env:ELECTRON_RUN_AS_NODE = $null      # 关键：DSH 环境会设这个变量，不清掉 Electron 会退化成 node
-node_modules\electron\dist\electron.exe . --folder "C:\Users\k\Desktop"
+- **一眼看到内容**：收起时是 2×2 / 3×3 / 4×4 网格预览，不用先打开资源管理器。
+- **点开就能操作**：双击文件用默认程序打开，双击文件夹进入下一级，右键就是原生菜单。
+- **桌面上完成整理**：拖文件进来、拖图标出去、框选多选、批量删除，像整理手机主屏一样整理桌面。
+- **一个组件一个目录**：工作资料、下载、素材、相册可以各放一个组件，互不干扰。
+- **看起来是 iPhone，背后是 Windows**：不接管资源管理器，不改变你的目录结构，不移动已有文件。
 
-# 或指定窗口位置（DIP），方便固定在桌面某个位置
-node_modules\electron\dist\electron.exe . --folder "C:\Users\k\Desktop" --pos 120,400
-```
+## 功能
 
-- 不传 `--folder` 时：用上次选择过的目录，否则默认用桌面。
-- 位置会记住（`%APPDATA%\ios-folder-widget\config.json`）。
-- 托盘图标（右下角）常驻：列出所有小组件（点一下展开对应文件夹）、新建文件夹小组件、**开机自启动开关**、退出。窗口本身不进任务栏。
-- **默认开机自启动**：首次启动会写入 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`（值名 `com.local.ios-folder-widget`）。开发态不直接指向项目目录，而是指向固定的启动器 `%LOCALAPPDATA%\ios-folder-widget\launch.ps1`；它先读 `%APPDATA%\ios-folder-widget\install.json` 里的当前路径，找不到就扫描 `Documents` / `Desktop` / `Downloads` 下的 `ios-folder-widget` 目录。**项目搬家后不需要重新勾选**（除非搬到这三个目录之外）。打包后则直接指向 exe 自身。开关状态存在 `config.json` 的 `autoStart`。
-- 若双击启动后看不到窗口：先确认没有 `ELECTRON_RUN_AS_NODE` 环境变量残留（见上）。
+### 外观
 
-## 多个小组件
+- 自绘磨砂玻璃：圆角、模糊、霜白叠层，会随当前壁纸取景。
+- 三种预览密度：**2×2（整体更小）/ 3×3（标准）/ 4×4（整体更大）**，文件夹本身会跟着变大小，不只是图标变疏密。
+- 每个组件可单独设置壁纸：预览、选择、清除、模糊开关、缩放、裁剪方式、裁剪位置。
+- 可调玻璃模糊、霜白强度、图标大小。
+- 收起是文件夹，点开原位展开成面板；面板会避开屏幕边缘。
 
-- **新建**：托盘 →「新建文件夹小组件…」，或右键任意小组件 →「新建文件夹小组件…」。**不弹目录选择框**：直接在桌面建一个「新建文件夹」（重名自动 (2)）并绑成新小组件。建出来的真实文件夹会被设为**隐藏**，资源管理器默认不显示，所以桌面上只看到 iPhone 风格图标；想绑已有目录，可以带 `--folder` 再启动一次。
-- **管理**：托盘菜单按目录名列出每个小组件，点哪个就展开哪个；右键小组件 →「移除这个小组件」（只移除窗口，不删文件夹）。
-- **持久化**：每个小组件的目录和位置分别保存，重启后原样恢复。
-- **不重叠**：新建的小组件会优先贴在已有组件的右侧/下方，没有空位就扫描桌面网格找位置，不会叠在一起。
-- **磁吸**：拖动时靠近另一个组件的边缘 12px 内会自动吸附，并**留出 10px 空隙**（不会完全贴在一起）；吸附瞬间两个组件边缘会亮起蓝色高亮。松手时只有压住对方约四分之一以上才按最小位移推开。
+### 文件
 
-## 检查更新
+- 真实目录：打开、进入子文件夹、重命名、删除、新建文件夹、新建快捷方式。
+- 搜索当前文件夹，按名称 / 修改时间 / 大小 / 类型排序。
+- Ctrl / Shift 多选，空白处拖框选。
+- 拖文件进来：询问「移动到这里 / 创建快捷方式 / 取消」。
+- 拖图标出去：桌面或资源管理器里落地为移动，其它应用按复制处理。
+- 删除进应用回收站，`Ctrl+Z` 撤销，默认保留 7 天。
+- 快捷方式图标会解析目标程序，去掉左下角小箭头；「此电脑」「回收站」这类系统位置也能取到正确图标。
 
-- 更新源：`package.json` 的 `repository` 指向 GitHub 仓库，或启动时设 `IOS_UPDATE_REPO=owner/repo`；
-- 右键 →「设置」→「检查更新…」，或设置窗口里的「检查更新」按钮；
-- 会请求 GitHub Releases 的 latest，版本更高时弹窗并打开下载页；不会自动下载/安装；
-- 未配置仓库时会提示先填更新源。
+### 桌面
 
-## 首次使用
+- 多个小组件可以同时摆放，各自绑定不同目录。
+- 拖动时靠近其它组件会自动吸附，留出固定间距，不会叠在一起。
+- 新建组件优先放在已有组件右侧或下方；没有空位会自动找位置。
+- 组件不进任务栏；托盘菜单集中管理所有文件夹、开机启动和设置。
+- 位置、尺寸、排序、壁纸、外观都会保存，重启后恢复。
 
-首次启动会弹一个简短说明，并问一次「要不要开机自动启动」。托盘图标可能被 Windows 收进右下角的 `^` 里，展开后把它拖到任务栏固定即可。之后所有设置都在右键 →「设置」里。
+### 系统
 
-## 安全与可靠性
-
-- **配置不会被写坏**：`config.json` 用「同目录临时文件 + rename」原子写入，写前保留 `.bak`；主文件损坏时自动读备份。
-- **拖出移动不靠猜**：不再用「同大小 + 同时间」判断，改为对目标文件做 **SHA-256** 内容校验，一致才把源文件移进回收站；校验失败/目标不是文件夹时保留源文件（等价于复制）。
-- **空目录会回收**：工具自动创建的「新建文件夹」在移除组件时，如果还是空的，会一起删掉；有内容则保留。
-- **可撤销删除**：删除先进应用回收站（`%APPDATA%\ios-folder-widget\trash`），`Ctrl+Z` 恢复；默认保留 7 天，设置里可打开/清空。
-- **有日志可查**：主进程异常、托盘、启动等写入 `%APPDATA%\ios-folder-widget\logs\main.log`；右键 →「设置」→「打开日志文件夹」。
-- **首次引导**：新用户会看到欢迎说明和开机启动选择，不会再出现“托盘图标去哪了”的问题。
+- 开机自启动可开关，默认不强制写入。
+- 配置原子写入并保留备份，异常退出不容易写坏。
+- 拖出移动会对目标文件做 SHA-256 校验，确认一致才移除源文件。
+- 检查更新：读取 GitHub Releases 最新版，有新版本时打开下载页。
 
 ## 安装
 
-- 下载 `iOS.Folder.Widget.Setup.<版本>.exe`，双击安装，不需要 Node 或源码目录；
-- 支持 Windows 10 / 11 x64；
-- 配置在 `%APPDATA%\ios-folder-widget\config.json`，卸载不会删除你的配置；
-- 首次运行如果 Windows 弹出安全提示，点「更多信息 → 仍要运行」即可。
+### 下载
 
-## 本地构建
+前往 **[Releases](https://github.com/kesai666/Desktop-folder/releases/latest)**，下载最新版：
 
-```powershell
+```text
+iOS.Folder.Widget.Setup.<版本>.exe
+```
+
+双击安装，按提示选择是否为当前用户安装、是否创建桌面 / 开始菜单快捷方式。
+
+### 系统要求
+
+- Windows 10 / 11 x64
+- 不需要 Node.js，不需要源码目录
+
+> 如果 Windows 首次运行提示「未知发布者」，点「更多信息 → 仍要运行」即可。
+
+## 快速上手
+
+1. 安装并启动，桌面上会出现一个文件夹组件（默认绑定桌面；右键可以换目录）。
+2. **单击**组件展开，**双击**文件打开，**双击文件夹**进入下一级。
+3. 右键组件 → **「壁纸与外观…」**，可以换壁纸、调模糊、切 2×2 / 3×3 / 4×4。
+4. 托盘图标 → **「新建文件夹小组件…」**，添加更多文件夹组件。
+5. 把文件从资源管理器拖进面板，或把面板里的图标拖到桌面。
+
+## 快捷键
+
+| 操作 | 功能 |
+|---|---|
+| 单击组件 | 展开面板 |
+| `Esc` / 点窗口外 / `×` | 收起 |
+| 双击 | 打开文件 / 进入文件夹 |
+| `Backspace` / 左上 `‹` | 返回上一级 |
+| 方向键 / `Enter` | 选择 / 打开 |
+| `F2` | 重命名 |
+| `Delete` | 删除到应用回收站 |
+| `Ctrl+Z` | 撤销上一次删除 |
+| `Ctrl` / `Shift` + 单击 | 多选 |
+| 空白处拖动 | 框选 |
+| `Ctrl+C` / `Ctrl+X` / `Ctrl+V` | 应用内复制 / 剪切 / 粘贴 |
+| `Ctrl+F` | 搜索当前文件夹 |
+| `Ctrl+Shift+N` | 新建文件夹 |
+
+## 自定义
+
+右键组件 → **「壁纸与外观…」**：
+
+- **壁纸**：选择图片后实时预览；支持模糊、缩放、`cover` / `contain`、裁剪位置。
+- **预览网格**：2×2、3×3、4×4，整个文件夹会一起缩放。
+- **玻璃**：模糊强度、霜白强度、图标大小。
+- **行为**：开机自启动、检查更新、应用回收站、日志目录。
+
+配置文件位于：
+
+```text
+%APPDATA%\ios-folder-widget\config.json
+```
+
+卸载不会删除这个目录，重装后配置还在。
+
+## 文件安全
+
+- 所有文件操作都在本机完成，不上传文件，不需要账号。
+- 拖出「移动」不是猜的：目标文件通过 SHA-256 内容校验后才移除源文件。
+- 删除先进应用回收站，不直接永久删除。
+- `config.json` 使用临时文件 + rename 原子写入，并保留 `.bak` 备份。
+- 除「检查更新」外，应用不主动联网。
+
+## 从源码运行
+
+需要 Node.js 20+、pnpm。
+
+```bash
 pnpm install
+pnpm start
+```
+
+打包 Windows 安装包：
+
+```bash
 pnpm run dist
 ```
 
-产物在 `dist/`，唯一发布包为 `iOS Folder Widget Setup <版本>.exe`。
+产物在 `dist/`。
 
-## 交互
+测试：
 
-| 操作 | 行为 |
-|---|---|
-| 单击小文件夹 | 原地放大成面板 |
-| 拖动小文件夹 | 缓动跟随；进入对齐点/吸附点的瞬间直接落位并弹一下（咔哒）；按可见图标限制在桌面内，磁吸留 10px 空隙 |
-| ESC / 点窗口外 / × / 切到别的窗口 | 收起 |
-| 双击条目 | 文件夹进入下一级，文件用默认程序打开 |
-| Backspace / 左上 ‹ | 返回上一级 |
-| 方向键 · Enter · F2 · Delete | 选择 · 打开 · 重命名 · 删到应用回收站 |
-| Ctrl+Z | 撤销上一次删除（从应用回收站恢复） |
-| Ctrl / Shift + 单击 | 多选（Ctrl 点选、Shift 连选）；标题下显示「已选 N 项」 |
-| 在空白处拖动 | 框选与选框相交的图标 |
-| Ctrl+C / Ctrl+X / Ctrl+V | 应用内复制 / 剪切 / 粘贴；剪贴板只在小工具内部有效 |
-| Ctrl+F | 搜索当前文件夹；Esc 清空并关闭搜索 |
-| 右键 →「设置」→「排序」 | 按名称 / 修改时间 / 大小 / 类型排序；手动排列后切回自定义顺序 |
-| 选中条目 / 点空白 | 标题下的地址栏显示该条目的完整路径；取消选中后回到当前文件夹路径。路径过长时不省略，下方出现横向滚动条，可拖动查看/复制，不能编辑 |
-| 点「排列」 | 进入抖动模式，拖动图标换位置，顺序按目录保存 |
-| 右键 →「按名称重新排序」 | 清掉自定义顺序，恢复文件夹优先 + 名称排序 |
-| 右键 →「新建文件夹」/ Ctrl+Shift+N | 在当前目录建真实文件夹，直接进入重命名 |
-| 右键 →「新建快捷方式…」 | 选择目标文件/文件夹，在当前目录生成 `.lnk` |
-| 右键 →「新建文件夹小组件…」/ 托盘同名项 | 在桌面新建隐藏的「新建文件夹」并绑成新小组件（只显示 iPhone 图标） |
-| 右键 →「设置」→「换个文件夹…」 | 把这个组件重新绑到已有目录；移除组件时不会再删这个目录 |
-| 右键 →「设置」→「设置文件夹壁纸…」/「清除文件夹壁纸」 | 给这个小组件单独换背景图，随组件保存，重启恢复 |
-| 右键 →「壁纸与外观…」 | 直接打开设置窗口并滚到「文件夹壁纸」区（预览/模糊/缩放/裁剪/位置）；小图标预览可切 2×2（整体更小）/ 3×3 / 4×4（整体更大） |
-| 右键 →「设置」→「打开设置窗口…」 | 独立设置窗口：模糊/霜白、壁纸预览/选择/清除/模糊开关/缩放/裁剪方式/位置、图标大小、恢复默认、开机启动、日志、回收站历史、检查更新、组件列表/新建/移除，拖动即时生效 |
-| 右键 →「设置」→「开机自启动」/「打开日志文件夹」 | 开关开机启动；日志在 `%APPDATA%\ios-folder-widget\logs\main.log` |
-| 右键 →「设置」→「撤销上一次删除」/「打开应用回收站」/「清空应用回收站」 | 应用回收站在 `%APPDATA%\ios-folder-widget\trash`，默认保留 7 天；设置窗口可看历史批次并逐批恢复 |
-| 右键 →「移除这个小组件」 | 只关窗口；如果是工具创建的空文件夹，会一并清理 |
-| 从资源管理器拖入 | 询问「移动到这里 / 创建快捷方式 / 取消」；移动会改文件位置，快捷方式只生成 `.lnk` |
-| 把条目拖出到桌面 / 已打开的资源管理器窗口 | **移动**：系统先复制，应用对目标做 SHA-256 内容校验，一致才把源文件移到回收站 |
-| 把条目拖出到其他应用（邮件、聊天等） | 复制（目标不是可识别的文件夹，源文件保留） |
-| 右键 | 原生菜单 |
-
-## 实现要点
-
-- **玻璃是自绘的**：窗口透明，里面一层「当前壁纸 + CSS `blur(26px) saturate(1.65)`」被圆角容器裁切，再叠一层霜白渐变和高光。这样能任意圆角、任意模糊强度——Windows 原生 Mica/Acrylic 材质只能画矩形，做不出 iPhone 的大圆角。
-- **窗口尺寸随状态变化**：收起时窗口就是小图标大小（160×184，含阴影留白），展开时才放大到 600×640（580×620 面板 + 10px 阴影边）。**不用 `setIgnoreMouseEvents` 做点击穿透**——那套在后台启动的进程上会丢点击（本项目实测过），窗口大小贴合内容更稳。
-- **位置不出桌面，但可以贴边**：钳制的是**可见图标 + 名字**的外框，不是整个窗口，所以图标能贴着屏幕边缘，30px 透明留白允许伸出屏幕外；任务栏之外、显示器拔掉/分辨率变化都会自动校正。
-- **多小组件**：进程内维护一张 `widgets` 表（每个 = 一个 BrowserWindow + 自己的 rootDir/位置/目录监听）；所有 IPC 通过 `event.sender` 反查所属窗口，互不串台。配置存成 `config.json` 的 `widgets` 数组（旧的单窗口配置会自动迁移），托盘菜单随小组件增删实时重建。新建小组件不弹目录选择框：直接在桌面创建「新建文件夹」（重名自动编号）并绑定；建出来的真实文件夹用 `attrib +h` 设为隐藏，桌面只显示 iPhone 风格图标。
-- **独立设置窗口**：`settings.html` 里可调玻璃模糊、霜白强度、图标大小、小图标预览网格（2×2 整体缩小 / 3×3 标准 / 4×4 整体放大），预览/选择/清除文件夹壁纸，开关壁纸模糊、缩放/裁剪方式/裁剪位置，恢复默认外观，开关开机启动，打开日志/应用回收站、清空回收站、查看回收站历史、检查更新、管理组件列表；拖动滑杆实时通过 IPC 推给对应小组件，配置按组件写入 `blur/frost/customBlur/iconSize/gridSize/wallpaperFit/wallpaperPosition/wallpaperScale/wallpaperBlur`。
-- **排序持久化**：名称/时间/大小/类型/自定义排序写进 `sortMode`，重启后保持；手动排列会切到自定义顺序，按名称重排会切回名称模式。
-- **回收站历史**：删除按批次记录（`batchId` + 时间 + 文件名），设置窗口可逐批恢复；`Ctrl+Z` 仍恢复最近一批，7 天后自动清理。
-- **框选**：网格空白处拖出选框，松开后选中所有与选框相交的图标，和 Ctrl/Shift 多选共用 `state.multi`。
-- **磁吸与防重叠**：拖动时按可见内容计算位置，靠近其他组件边缘 12px 内自动吸附并留 10px 空隙（左右或上下并排），两个组件同时亮蓝色高亮；松手时若重叠面积超过约 25% 才按最小位移推开；新建组件优先贴在已有组件右侧/下方（同样留空隙），没有空位则扫描桌面网格找不重叠的位置。
-- **拖动丝滑 + 咔哒吸附**：拖动位置用缓动跟随（8ms 一帧，向目标插值）；被拖动组件刚进入同一行/列（顶边或左边 8px 内），或刚进入磁吸范围时，不做停顿，而是**直接落位到对齐/吸附点**，同时两个组件做一次 180ms 的缩放回弹（`1 → 1.06 → 0.985 → 1`），像卡扣"咔哒"扣上；之后继续跟手。松手时也会按略宽的范围（14px）再对齐一次，避免"拖动时咔哒了、放手又差几像素"。没有额外的引导线窗口。
-- **拖出＝移动的实现**：Electron 的 `webContents.startDrag` 在 Windows 上把文件按「复制」交给系统。拖放开始时应用启动一个轻量监听进程，等鼠标松开后确定落点（桌面 / 资源管理器窗口），确认目标目录里出现了同大小、同修改时间的副本，才删除源文件。落点不是可识别的文件夹（别的应用 / 取消）时保留源文件，等价于复制。
-- **自定义排列**：点标题栏「排列」进入抖动模式，拖动图标换位置；顺序按目录保存在 `%APPDATA%\ios-folder-widget\orders.json`，右键「按名称重新排序」可清除。重命名/删除会同步维护顺序，新文件按默认规则追加。排列模式下拖动只排序，不会拖出文件。
-- **地址栏**：标题下那行默认显示当前文件夹路径；选中某个条目时切到该条目的完整路径，点空白取消选中后回到文件夹路径。路径超长时不再省略号截断，而是变成横向滚动，下面出现一条可拖动的滚动条，能拖到任意位置查看/选中复制；实现上是纯文本 `div` + `user-select: text`，不是输入框，改不了。
-- **自定义壁纸**：每个 widget 的配置里存 `wallpaper` 路径；选中图片后不再采样桌面，而是直接把图铺满该组件的 mini/panel，模糊降到 10px（桌面壁纸是 26px）；清除后回退桌面壁纸。更换/清除会通过 IPC 广播到窗口即时生效，路径随 `config.json` 持久化，重启恢复。
-- **新建文件夹**：右键「新建文件夹」或 `Ctrl+Shift+N`，在**当前目录**（进到子文件夹里就建在子文件夹里）创建真实目录；重名会自动生成「新建文件夹 (2)」，并直接进入内联重命名。新文件夹的图标和已有子文件夹完全一样（九宫格玻璃块）。
-- **快捷方式图标**：`.lnk` 先解析 `TargetPath`（或 `IconLocation`）再取目标程序/文件夹图标，不请求 `LINKOVERLAY`，所以没有左下角快捷方式箭头；「此电脑」「回收站」这类 shell 命名空间会解析 `::{CLSID}` 并查注册表 `DefaultIcon`；`.url` 读 `IconFile=`。普通文件先用系统缩略图，失败回退文件类型图标，再失败显示白底扩展名兜底块。
-- **展开时若面板会出屏**：窗口自动平移让面板完整可见，同时返回偏移量，让小图标保持在屏幕原位（收起时再还原）。
-- **磨砂取景**：和 iOS 一样，玻璃里是壁纸本身，不是背后的窗口，所以放在桌面上时质感最接近 iPhone。
-- **图标**：图片/视频/PDF 等用系统缩略图（`nativeImage.createThumbnailFromPath`），其余用系统文件图标（`app.getFileIcon`）；子文件夹画成「迷你九宫格」以区分。
-- **防抖**：目录用 `fs.watch` 监听，外部改动 250ms 防抖后自动刷新。
-
-## 目录
-
-```
-src/main.js            主进程：窗口/托盘/菜单/目录与图标 IPC/拖放移动/尺寸与位置
-src/preload.js         安全桥（contextBridge）
-src/fsutil.js          目录列举、重名处理、移动、SHA-256 内容校验、文件名校验
-src/renderer/          index.html / styles.css / renderer.js（玻璃外观与交互）
-test/fsutil.test.js    文件层单测（node --test，7 个用例）
-scripts/capture.ps1    真机截图（DPI 感知）+ 裁剪放大
-scripts/input.ps1      真鼠标/键盘注入（测试用）
-scripts/cdp.mjs        极简 CDP 客户端（eval / screenshot）
-scripts/resolve-drop.ps1  拖放落点解析（桌面 / 资源管理器窗口路径）
-scripts/extract-icon.ps1  .lnk 目标图标提取（SHGetFileInfo）
-scripts/after-pack.js  打包后写 exe 图标/版本（rcedit）
-scripts/ensure-electron.js  postinstall 检查 Electron 二进制
-scripts/make-tray-icon.ps1 / make-ico.js  重新生成托盘图标
-assets/tray.ico        多尺寸托盘图标（16/20/24/32/48/64/256）
-assets/icon.png        应用/安装包图标
-.github/workflows/build.yml  Windows CI：测试 + 打安装包
+```bash
+pnpm test
+pnpm test:e2e
 ```
 
-## 自查
+<details>
+<summary>项目结构</summary>
 
-```powershell
-pnpm test        # node --test test/fsutil.test.js（7 个用例）
-pnpm test:e2e    # Electron 冒烟：启动、页面加载、面板展开
-pnpm dist        # Windows 安装包（NSIS），输出 dist/
+```text
+src/main.js              主进程：窗口、托盘、菜单、文件 IPC、拖放、尺寸与位置
+src/preload.js           安全桥（contextBridge）
+src/fsutil.js            目录列举、重命名、移动、SHA-256 校验
+src/renderer/            桌面小组件界面（HTML / CSS / JS）
+src/settings.html|js     独立设置窗口
+scripts/extract-icon.ps1 .lnk / 系统位置图标提取
+scripts/resolve-drop.ps1 拖放落点解析
+scripts/after-pack.js    打包后写 exe 图标与版本信息
+test/                    文件层单测 + Electron 冒烟测试
+.github/workflows/       Windows 构建与 Release
 ```
+
+</details>
+
+## License
+
+[MIT](LICENSE) © 2025-2026 ios-folder-widget contributors
+
+<div align="center">
+
+[![build](https://github.com/kesai666/Desktop-folder/actions/workflows/build.yml/badge.svg)](https://github.com/kesai666/Desktop-folder/actions/workflows/build.yml)
+
+</div>
