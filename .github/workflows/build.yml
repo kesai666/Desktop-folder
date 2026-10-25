@@ -2,7 +2,13 @@ name: build-windows
 
 on:
   push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
+
+permissions:
+  contents: write
+  issues: write
 
 jobs:
   build:
@@ -25,10 +31,34 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Check Electron runtime
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'node_modules/electron/dist/electron.exe')) {
+            throw 'node_modules/electron/dist/electron.exe is missing'
+          }
+          node -e "console.log('electron runtime ok')"
+
       - name: Build installer + portable
-        run: pnpm dist
+        shell: pwsh
+        run: |
+          pnpm dist 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Report build failure
+        if: failure()
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if (Test-Path build.log) {
+            $log = Get-Content build.log -Raw
+            if ($log.Length -gt 60000) { $log = $log.Substring($log.Length - 60000) }
+            Set-Content -Path build-tail.log -Value $log -Encoding utf8
+            gh issue create --title "CI build failure run ${{ github.run_id }}" --body-file build-tail.log
+          }
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -38,3 +68,24 @@ jobs:
             dist/*.exe
             dist/*.blockmap
           if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: release
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            release/*.exe release/*.blockmap \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes
