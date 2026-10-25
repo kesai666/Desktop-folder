@@ -13,8 +13,7 @@
 [![release](https://img.shields.io/github/v/release/kesai666/Desktop-folder)](https://github.com/kesai666/Desktop-folder/releases)
 
 - [下载最新版](https://github.com/kesai666/Desktop-folder/releases/latest)
-- 安装版：`iOS.Folder.Widget.Setup.<版本>.exe`
-- 便携版：`iOS.Folder.Widget.<版本>.exe`（双击即用，不写注册表）
+- 唯一发布包：`iOS.Folder.Widget.Setup.<版本>.exe`（安装版）
 
 ## 它是什么
 
@@ -25,6 +24,7 @@ iPhone 的文件夹是「图标的分组视图」，Windows 的文件夹是「�
 | 圆角磨砂玻璃、3×3 九宫格预览、下方小字名字 | 窗口自绘的玻璃外观（圆角、模糊、霜白叠层） |
 | 点一下原地放大成多行面板 | 窗口从小图标尺寸放大到面板尺寸，内容浮出 |
 | 里面的每个图标 | 目录里的真实文件 / 子文件夹 |
+| 快捷方式（.lnk） | 解析目标程序/文件夹后取图标，不显示左下角快捷方式箭头 |
 | 拖文件进面板 | 真的移动到该目录（同名自动改 `a (2).txt`） |
 | 把图标拖出去 | 真的拖到桌面 / 资源管理器（原生拖放） |
 | 删除 | 进应用回收站，`Ctrl+Z` 撤销，7 天后自动清理 |
@@ -99,10 +99,9 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 
 产物在 `dist/`：
 
-- `iOS Folder Widget Setup 0.1.0.exe`：安装版，可选安装目录，带桌面/开始菜单快捷方式和卸载；
-- `iOS Folder Widget 0.1.0.exe`：便携版，双击即用，不需要安装 Node。
+- `iOS Folder Widget Setup 1.0.0.exe`：唯一发布包，可选安装目录，带桌面/开始菜单快捷方式和卸载。
 
-发给别人时，发 `Setup.exe` 或便携版其中之一即可；对方双击安装/运行，不需要 Node 或源码。
+发给别人时只发这个 `Setup.exe`；对方双击安装，不需要 Node 或源码。
 
 > 构建时 exe 的图标和版本信息由 `scripts/after-pack.js` 调 `rcedit` 写入。electron-builder 默认走 winCodeSign，解压其中 macOS 符号链接需要管理员权限，普通账户会报 `Cannot create symbolic link`，所以 `build.win.signAndEditExecutable` 设为 `false`，改由 afterPack 处理。
 
@@ -111,8 +110,7 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 - 系统只需要 Windows 10/11 x64，不需要 Node、不需要源码目录；
 - 打包版默认**不会**自动写开机启动，需要时在托盘菜单勾「开机自启动」；
 - 配置在 `%APPDATA%\ios-folder-widget\config.json`，卸载不会删除；
-- exe 未做代码签名，首次运行 SmartScreen 会提示「更多信息 → 仍要运行」；
-- 如果只发便携版，移动 exe 后需要在托盘里重新勾一次开机自启动；安装版没有这个问题。
+- exe 未做代码签名，首次运行 SmartScreen 会提示「更多信息 → 仍要运行」。
 
 ## 交互
 
@@ -136,7 +134,7 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 | 右键 →「新建文件夹小组件…」/ 托盘同名项 | 在桌面新建隐藏的「新建文件夹」并绑成新小组件（只显示 iPhone 图标） |
 | 右键 →「设置」→「换个文件夹…」 | 把这个组件重新绑到已有目录；移除组件时不会再删这个目录 |
 | 右键 →「设置」→「设置文件夹壁纸…」/「清除文件夹壁纸」 | 给这个小组件单独换背景图，随组件保存，重启恢复 |
-| 右键 →「设置」→「打开设置窗口…」 | 独立设置窗口：模糊/霜白/壁纸模糊、开机启动、日志与回收站、检查更新、移除组件，拖动即时生效 |
+| 右键 →「设置」→「打开设置窗口…」 | 独立设置窗口：模糊/霜白/壁纸模糊、图标大小、壁纸铺满/完整、开机启动、日志与回收站、检查更新、新建/移除组件，拖动即时生效 |
 | 右键 →「设置」→「开机自启动」/「打开日志文件夹」 | 开关开机启动；日志在 `%APPDATA%\ios-folder-widget\logs\main.log` |
 | 右键 →「设置」→「撤销上一次删除」/「打开应用回收站」/「清空应用回收站」 | 应用回收站在 `%APPDATA%\ios-folder-widget\trash`，默认保留 7 天 |
 | 右键 →「移除这个小组件」 | 只关窗口；如果是工具创建的空文件夹，会一并清理 |
@@ -151,7 +149,7 @@ $env:ELECTRON_BUILDER_BINARIES_MIRROR = 'https://npmmirror.com/mirrors/electron-
 - **窗口尺寸随状态变化**：收起时窗口就是小图标大小（160×184，含阴影留白），展开时才放大到 600×640（580×620 面板 + 10px 阴影边）。**不用 `setIgnoreMouseEvents` 做点击穿透**——那套在后台启动的进程上会丢点击（本项目实测过），窗口大小贴合内容更稳。
 - **位置不出桌面，但可以贴边**：钳制的是**可见图标 + 名字**的外框，不是整个窗口，所以图标能贴着屏幕边缘，30px 透明留白允许伸出屏幕外；任务栏之外、显示器拔掉/分辨率变化都会自动校正。
 - **多小组件**：进程内维护一张 `widgets` 表（每个 = 一个 BrowserWindow + 自己的 rootDir/位置/目录监听）；所有 IPC 通过 `event.sender` 反查所属窗口，互不串台。配置存成 `config.json` 的 `widgets` 数组（旧的单窗口配置会自动迁移），托盘菜单随小组件增删实时重建。新建小组件不弹目录选择框：直接在桌面创建「新建文件夹」（重名自动编号）并绑定；建出来的真实文件夹用 `attrib +h` 设为隐藏，桌面只显示 iPhone 风格图标。
-- **独立设置窗口**：`settings.html` 里可调玻璃模糊、霜白强度、自定义壁纸模糊，开关开机启动，打开日志/应用回收站、清空回收站、移除组件；拖动滑杆实时通过 IPC 推给对应小组件，配置按组件写入 `blur/frost/customBlur`。
+- **独立设置窗口**：`settings.html` 里可调玻璃模糊、霜白强度、自定义壁纸模糊、图标大小、壁纸铺满/完整，开关开机启动，打开日志/应用回收站、清空回收站、新建/移除组件；拖动滑杆实时通过 IPC 推给对应小组件，配置按组件写入 `blur/frost/customBlur/iconSize/wallpaperFit`。
 - **磁吸与防重叠**：拖动时按可见内容计算位置，靠近其他组件边缘 12px 内自动吸附并留 10px 空隙（左右或上下并排），两个组件同时亮蓝色高亮；松手时若重叠面积超过约 25% 才按最小位移推开；新建组件优先贴在已有组件右侧/下方（同样留空隙），没有空位则扫描桌面网格找不重叠的位置。
 - **拖动丝滑 + 咔哒吸附**：拖动位置用缓动跟随（8ms 一帧，向目标插值）；被拖动组件刚进入同一行/列（顶边或左边 8px 内），或刚进入磁吸范围时，不做停顿，而是**直接落位到对齐/吸附点**，同时两个组件做一次 180ms 的缩放回弹（`1 → 1.06 → 0.985 → 1`），像卡扣"咔哒"扣上；之后继续跟手。松手时也会按略宽的范围（14px）再对齐一次，避免"拖动时咔哒了、放手又差几像素"。没有额外的引导线窗口。
 - **拖出＝移动的实现**：Electron 的 `webContents.startDrag` 在 Windows 上把文件按「复制」交给系统。拖放开始时应用启动一个轻量监听进程，等鼠标松开后确定落点（桌面 / 资源管理器窗口），确认目标目录里出现了同大小、同修改时间的副本，才删除源文件。落点不是可识别的文件夹（别的应用 / 取消）时保留源文件，等价于复制。
@@ -201,12 +199,12 @@ assets/icon.png        应用/安装包图标
 
 ```powershell
 pnpm test        # node --test test/fsutil.test.js（7 个用例）
-pnpm dist        # Windows 安装包 + 便携版，输出 dist/
+pnpm dist        # Windows 安装包（NSIS），输出 dist/
 ```
 
-## 下一步（按价值排序）
+## 后续可选改进（非成品阻塞项）
 
 1. 代码签名 + 自动下载安装更新（当前只做检查更新 + 打开下载页）。
 2. 主进程拆分模块 + 拖放/IPC/配置迁移 E2E 测试 + 桌面层 WorkerW 适配。
 3. 应用回收站容量/保留天数设置，支持跨重启的撤销历史列表。
-4. 设置窗口补齐图标大小、壁纸裁切/位置、组件管理。
+4. 壁纸位置/裁切微调，设置窗口里的组件列表管理。

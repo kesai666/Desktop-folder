@@ -75,6 +75,25 @@ section {
 .range output { color: var(--muted); font-variant-numeric: tabular-nums; }
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 
+.select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0 4px;
+  font-size: 12px;
+}
+
+.select select {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
 .check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .check input { width: 16px; height: 16px; accent-color: var(--accent); }
 

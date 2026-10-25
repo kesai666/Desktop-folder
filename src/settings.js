@@ -1,7 +1,7 @@
 'use strict';
 
 const $ = (id) => document.getElementById(id);
-let appearance = { blur: 26, frost: 100, customBlur: 10 };
+let appearance = { blur: 26, frost: 100, customBlur: 10, iconSize: 64, wallpaperFit: 'cover' };
 let saveTimer = 0;
 
 function setStatus(text) {
@@ -16,9 +16,12 @@ function render(data) {
   $('blur').value = appearance.blur;
   $('frost').value = appearance.frost;
   $('customBlur').value = appearance.customBlur;
+  $('iconSize').value = appearance.iconSize;
+  $('wallpaperFit').value = appearance.wallpaperFit;
   $('blurValue').textContent = `${appearance.blur}px`;
   $('frostValue').textContent = `${appearance.frost}%`;
   $('customBlurValue').textContent = `${appearance.customBlur}px`;
+  $('iconSizeValue').textContent = `${appearance.iconSize}px`;
   $('autoStart').checked = data.autoStart !== false;
 }
 
@@ -26,6 +29,7 @@ function syncLabels() {
   $('blurValue').textContent = `${$('blur').value}px`;
   $('frostValue').textContent = `${$('frost').value}%`;
   $('customBlurValue').textContent = `${$('customBlur').value}px`;
+  $('iconSizeValue').textContent = `${$('iconSize').value}px`;
 }
 
 function scheduleSave() {
@@ -34,6 +38,8 @@ function scheduleSave() {
     blur: Number($('blur').value),
     frost: Number($('frost').value),
     customBlur: Number($('customBlur').value),
+    iconSize: Number($('iconSize').value),
+    wallpaperFit: $('wallpaperFit').value,
   };
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
@@ -42,13 +48,20 @@ function scheduleSave() {
   }, 80);
 }
 
-for (const id of ['blur', 'frost', 'customBlur']) {
+for (const id of ['blur', 'frost', 'customBlur', 'iconSize']) {
   $(id).addEventListener('input', scheduleSave);
 }
+$('wallpaperFit').addEventListener('change', scheduleSave);
 
 $('autoStart').addEventListener('change', async () => {
   const res = await window.settings.setAutoStart($('autoStart').checked);
   if (res && res.ok) setStatus($('autoStart').checked ? '已开启开机启动' : '已关闭开机启动');
+});
+
+$('addWidget').addEventListener('click', async () => {
+  const res = await window.settings.addWidget();
+  if (res && res.ok) setStatus(`已新建「${res.name}」`);
+  else setStatus((res && res.error) || '新建小组件失败');
 });
 
 $('openLogs').addEventListener('click', async () => {

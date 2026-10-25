@@ -62,6 +62,7 @@ body {
 
 /* 自定义壁纸：不采样桌面，直接铺满当前组件，模糊轻一点 */
 .wp.custom {
+  background-size: var(--wp-fit, cover);
   filter: blur(var(--custom-blur, 10px)) saturate(1.18) brightness(0.98);
 }
 
@@ -540,10 +541,10 @@ body.dark .search {
 }
 
 .tile .art {
-  width: 64px;
-  height: 64px;
+  width: var(--tile-icon, 64px);
+  height: var(--tile-icon, 64px);
   flex: 0 0 auto;
-  border-radius: 15px;
+  border-radius: calc(var(--tile-icon, 64px) * 0.23);
   overflow: hidden;
   display: flex;
   align-items: center;

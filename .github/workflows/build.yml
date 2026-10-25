@@ -39,7 +39,7 @@ jobs:
           }
           node -e "console.log('electron runtime ok')"
 
-      - name: Build installer + portable
+      - name: Build installer
         shell: pwsh
         run: |
           pnpm dist 2>&1 | Tee-Object -FilePath build.log
@@ -66,7 +66,6 @@ jobs:
           name: windows-build
           path: |
             dist/*.exe
-            dist/*.blockmap
           if-no-files-found: error
 
   release:
@@ -86,7 +85,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${GITHUB_REF_NAME}" \
-            release/*.exe release/*.blockmap \
+            release/*.exe \
             --repo "${GITHUB_REPOSITORY}" \
             --title "${GITHUB_REF_NAME}" \
             --generate-notes

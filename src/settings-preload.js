@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('settings', {
   get: () => ipcRenderer.invoke('settings:get'),
   setAppearance: (appearance) => ipcRenderer.invoke('settings:appearance', appearance),
   setAutoStart: (enabled) => ipcRenderer.invoke('settings:auto-start', enabled),
+  addWidget: () => ipcRenderer.invoke('settings:add-widget'),
   openLogs: () => ipcRenderer.invoke('settings:open-logs'),
   openTrash: () => ipcRenderer.invoke('settings:open-trash'),
   emptyTrash: () => ipcRenderer.invoke('settings:empty-trash'),

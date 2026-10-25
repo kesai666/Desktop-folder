@@ -34,6 +34,17 @@
         <span>自定义壁纸模糊 <output id="customBlurValue"></output></span>
         <input id="customBlur" type="range" min="0" max="30" step="1" />
       </label>
+      <label class="range">
+        <span>图标大小 <output id="iconSizeValue"></output></span>
+        <input id="iconSize" type="range" min="52" max="76" step="1" />
+      </label>
+      <label class="select">
+        <span>壁纸显示方式</span>
+        <select id="wallpaperFit">
+          <option value="cover">铺满裁剪</option>
+          <option value="contain">完整显示</option>
+        </select>
+      </label>
     </section>
 
     <section>
@@ -47,6 +58,7 @@
     <section>
       <h2>维护</h2>
       <div class="buttons">
+        <button id="addWidget">新建小组件</button>
         <button id="openLogs">打开日志文件夹</button>
         <button id="openTrash">打开应用回收站</button>
         <button id="emptyTrash">清空应用回收站</button>

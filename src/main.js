@@ -174,6 +174,8 @@ function saveWidgetConfig(w) {
     item.blur = w.blur;
     item.frost = w.frost;
     item.customBlur = w.customBlur;
+    item.iconSize = w.iconSize;
+    item.wallpaperFit = w.wallpaperFit;
   } else {
     config.widgets.push({
       id: w.id,
@@ -185,6 +187,8 @@ function saveWidgetConfig(w) {
       blur: w.blur,
       frost: w.frost,
       customBlur: w.customBlur,
+      iconSize: w.iconSize,
+      wallpaperFit: w.wallpaperFit,
     });
   }
   saveConfig();
@@ -790,7 +794,7 @@ function widgetFrom(event) {
 
 function createWidget({
   folder, x, y, id, autoOpen = false, wallpaper = null, autoFolder = false,
-  blur = 26, frost = 100, customBlur = 10,
+  blur = 26, frost = 100, customBlur = 10, iconSize = 64, wallpaperFit = 'cover',
 }) {
   const wid = Number.isFinite(id) ? id : nextWidgetId++;
   if (wid >= nextWidgetId) nextWidgetId = wid + 1;
@@ -852,6 +856,8 @@ function createWidget({
     blur: Number.isFinite(blur) ? Math.min(40, Math.max(0, Math.round(blur))) : 26,
     frost: Number.isFinite(frost) ? Math.min(100, Math.max(0, Math.round(frost))) : 100,
     customBlur: Number.isFinite(customBlur) ? Math.min(30, Math.max(0, Math.round(customBlur))) : 10,
+    iconSize: Number.isFinite(iconSize) ? Math.min(76, Math.max(52, Math.round(iconSize))) : 64,
+    wallpaperFit: wallpaperFit === 'contain' ? 'contain' : 'cover',
   };
   widgets.set(wid, w);
 
@@ -1079,13 +1085,14 @@ async function checkForUpdates(parent) {
     await show({
       type: 'info',
       title: '检查更新',
-      message: '还没有配置更新源',
-      detail: '在 package.json 的 repository 填入 GitHub 仓库（或设置 IOS_UPDATE_REPO=owner/repo），重新打包即可。',
+      message: '当前版本还没有配置更新源',
+      detail: '成品发布后会指向公开的 GitHub Release；开发版看到这个提示可以忽略。',
       buttons: ['知道了'],
       noLink: true,
     });
     return { ok: false, error: 'no-repo' };
   }
+  const releasesUrl = `https://github.com/${repo.owner}/${repo.repo}/releases`;
   try {
     const res = await fetch(
       `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest`,
@@ -1094,6 +1101,20 @@ async function checkForUpdates(parent) {
         signal: AbortSignal.timeout(12000),
       },
     );
+    if (res.status === 404) {
+      const choice = await show({
+        type: 'info',
+        title: '检查更新',
+        message: '更新源暂时读不到',
+        detail: '仓库可能是私有的，或者还没有发布 Release。可以打开 Releases 页面手动查看。',
+        buttons: ['打开 Releases', '知道了'],
+        defaultId: 0,
+        cancelId: 1,
+        noLink: true,
+      });
+      if (choice.response === 0) await shell.openExternal(releasesUrl);
+      return { ok: false, error: 'not-found', url: releasesUrl };
+    }
     if (!res.ok) throw new Error(`GitHub API ${res.status}`);
     const data = await res.json();
     const current = app.getVersion();
@@ -1323,7 +1344,13 @@ function registerIpc() {
       display: displayInfo(w.win),
       wallpaper: wallpaperInfo(),
       customWallpaper: customWallpaperInfo(w),
-      appearance: { blur: w.blur, frost: w.frost, customBlur: w.customBlur },
+      appearance: {
+        blur: w.blur,
+        frost: w.frost,
+        customBlur: w.customBlur,
+        iconSize: w.iconSize,
+        wallpaperFit: w.wallpaperFit,
+      },
       dark: nativeTheme.shouldUseDarkColors,
       sizes: {
         panel: PANEL_WIN,
@@ -1930,7 +1957,13 @@ function registerIpc() {
     return {
       folder: w.rootDir,
       autoStart: config.autoStart !== false,
-      appearance: { blur: w.blur, frost: w.frost, customBlur: w.customBlur },
+      appearance: {
+        blur: w.blur,
+        frost: w.frost,
+        customBlur: w.customBlur,
+        iconSize: w.iconSize,
+        wallpaperFit: w.wallpaperFit,
+      },
     };
   });
 
@@ -1940,24 +1973,41 @@ function registerIpc() {
     const blur = Math.min(40, Math.max(0, Math.round(Number(appearance && appearance.blur))));
     const frost = Math.min(100, Math.max(0, Math.round(Number(appearance && appearance.frost))));
     const customBlur = Math.min(30, Math.max(0, Math.round(Number(appearance && appearance.customBlur))));
+    const iconSize = Math.min(76, Math.max(52, Math.round(Number(appearance && appearance.iconSize))));
+    const wallpaperFit = appearance && appearance.wallpaperFit === 'contain' ? 'contain' : 'cover';
     w.blur = Number.isFinite(blur) ? blur : w.blur;
     w.frost = Number.isFinite(frost) ? frost : w.frost;
     w.customBlur = Number.isFinite(customBlur) ? customBlur : w.customBlur;
+    w.iconSize = Number.isFinite(iconSize) ? iconSize : w.iconSize;
+    w.wallpaperFit = wallpaperFit;
     saveWidgetConfig(w);
     if (w.win && !w.win.isDestroyed()) {
       w.win.webContents.send('ui:appearance', {
         blur: w.blur,
         frost: w.frost,
         customBlur: w.customBlur,
+        iconSize: w.iconSize,
+        wallpaperFit: w.wallpaperFit,
       });
     }
-    return { ok: true, appearance: { blur: w.blur, frost: w.frost, customBlur: w.customBlur } };
+    return {
+      ok: true,
+      appearance: {
+        blur: w.blur,
+        frost: w.frost,
+        customBlur: w.customBlur,
+        iconSize: w.iconSize,
+        wallpaperFit: w.wallpaperFit,
+      },
+    };
   });
 
   ipcMain.handle('settings:auto-start', async (event, enabled) => {
     setAutoStart(!!enabled);
     return { ok: true };
   });
+
+  ipcMain.handle('settings:add-widget', async () => addWidgetAuto());
 
   ipcMain.handle('settings:open-logs', async () => {
     try {
@@ -2161,6 +2211,8 @@ app.whenReady().then(() => {
         blur: item.blur,
         frost: item.frost,
         customBlur: item.customBlur,
+        iconSize: item.iconSize,
+        wallpaperFit: item.wallpaperFit,
         autoOpen: first && autoOpen,
       });
       first = false;
